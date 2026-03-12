@@ -3,269 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивная Лаборатория Кариотипирования</title>
+    <title>Цитогенетическая Лаборатория</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; overflow: hidden; }
-        
-        /* Стили для drag-and-drop элементов */
-        [draggable="true"] { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; }
-        [draggable="true"]:active { cursor: grabbing; transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        [draggable="true"] { cursor: grab; }
+        [draggable="true"]:active { cursor: grabbing; }
         .drag-over { border-color: #3b82f6 !important; background-color: #eff6ff !important; }
-
-        /* Жидкость в пробирке */
-        .liquid { transition: height 0.5s ease, background-color 0.5s ease; }
-        
-        /* Анимация пульсации для текущей цели */
-        @keyframes pulse-border {
-            0%, 100% { border-color: #cbd5e1; }
-            50% { border-color: #3b82f6; }
-        }
-        .target-active { animation: pulse-border 2s infinite; border-width: 3px; }
-
-        /* Скрытие элементов с плавным переходом */
-        .page { transition: opacity 0.5s ease; }
-        .hidden-page { opacity: 0; pointer-events: none; position: absolute; width: 100%; height: 100%; }
-        
-        /* Нейтральный красный для ошибок */
+        .liquid { transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease; }
+        .hidden-page { display: none !important; }
         .error-bg { background-color: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .anim-pulse { animation: pulse 2s infinite; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col">
 
-    <div id="error-panel" class="fixed bottom-0 left-0 right-0 p-4 transform translate-y-full transition-transform duration-300 z-50 error-bg border-t shadow-lg hidden">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center">
-                <span class="text-2xl mr-3">⚠️</span>
-                <p id="error-message" class="font-medium"></p>
+    <div id="error-panel" class="fixed bottom-0 left-0 right-0 p-5 transform translate-y-full transition-transform duration-300 z-50 error-bg border-t shadow-2xl hidden">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">⚠️</span>
+                <p id="error-message" class="font-medium text-sm md:text-base"></p>
             </div>
-            <button onclick="hideError()" class="text-sm font-semibold opacity-70 hover:opacity-100">Закрыть</button>
+            <button onclick="hideError()" class="text-xs font-bold uppercase tracking-widest opacity-60 hover:opacity-100">Закрыть</button>
         </div>
     </div>
 
-    <div id="landing-page" class="page flex-grow flex flex-col items-center justify-center p-6 bg-white z-40">
-        <header class="text-center max-w-2xl">
-            <div class="text-6xl mb-6">🔬</div>
-            <h1 class="text-4xl md:text-5xl font-semibold mb-4 text-slate-800 tracking-tight">Цитогенетическая Лаборатория</h1>
-            <p class="text-lg text-slate-500 mb-8 font-light leading-relaxed">
-                Добро пожаловать. Ваша задача — самостоятельно подготовить образец крови пациента для анализа кариотипа. Используйте оборудование на столе, следуйте протоколу и избегайте ошибок.
-            </p>
-            <button onclick="startLab()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-10 rounded-full transition-colors shadow-sm text-lg">
-                Приступить к работе
-            </button>
-        </header>
+    <div id="landing-page" class="flex-grow flex flex-col items-center justify-center p-6 bg-white transition-opacity duration-500">
+        <div class="text-7xl mb-6">🔬</div>
+        <h1 class="text-4xl md:text-5xl font-semibold mb-4 text-slate-800 text-center">Виртуальная Лаборатория</h1>
+        <p class="text-lg text-slate-500 mb-8 font-light max-w-xl text-center leading-relaxed">
+            Подготовка биологического материала к кариотипированию. Следуйте протоколу, используйте оборудование и избегайте ошибок.
+        </p>
+        <button id="main-start-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-12 rounded-full transition-all shadow-lg hover:shadow-xl active:scale-95">
+            Приступить к работе
+        </button>
     </div>
 
-    <div id="lab-page" class="page hidden-page flex-grow flex flex-col h-screen">
-        <header class="bg-white border-b border-slate-200 p-4 flex justify-between items-center">
-            <h1 class="text-xl font-semibold text-slate-800">Подготовка материала: Кариотипирование</h1>
-            <div class="text-sm text-slate-500">ID Пациента: <span class="font-mono text-slate-800">#RU-7712-A</span></div>
+    <div id="lab-page" class="hidden-page flex-grow flex flex-col h-screen overflow-hidden">
+        <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
+            <span class="font-semibold text-slate-700">Протокол подготовки №77-A</span>
+            <div id="step-counter" class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase">Шаг 1/7</div>
         </header>
 
         <div class="flex-grow flex overflow-hidden">
-            <aside class="w-1/4 bg-white border-r border-slate-200 p-6 flex flex-col gap-4 overflow-y-auto">
-                <h2 class="text-sm uppercase tracking-wide font-semibold text-slate-500 mb-2">Оборудование и реагенты</h2>
+            <aside class="w-72 bg-white border-r p-5 flex flex-col gap-3 overflow-y-auto">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Рабочий стол</h3>
                 
-                <div id="item-blood" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🩸</span>
-                    <div>
-                        <div class="font-medium">Пробирка с кровью</div>
-                        <div class="text-xs text-slate-500">Образец пациента (с гепарином)</div>
-                    </div>
+                <div id="item-blood" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🩸</span>
+                    <div class="text-xs font-medium">Кровь (Гепарин)</div>
                 </div>
-
-                <div id="item-pha" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🧪</span>
-                    <div>
-                        <div class="font-medium">ФГА (Митоген)</div>
-                        <div class="text-xs text-slate-500">Фитогемагглютинин</div>
-                    </div>
+                <div id="item-pha" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🧪</span>
+                    <div class="text-xs font-medium">ФГА (Митоген)</div>
                 </div>
-
-                <div id="item-incubator" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🚪</span>
-                    <div>
-                        <div class="font-medium">СО2-Инкубатор</div>
-                        <div class="text-xs text-slate-500">Термостат 37°C</div>
-                    </div>
+                <div id="item-incubator" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🚪</span>
+                    <div class="text-xs font-medium">Инкубатор 37°C</div>
                 </div>
-
-                <div id="item-colchicine" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🛑</span>
-                    <div>
-                        <div class="font-medium">Колхицин</div>
-                        <div class="text-xs text-slate-500">Разрушитель веретена деления</div>
-                    </div>
+                <div id="item-colchicine" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🛑</span>
+                    <div class="text-xs font-medium">Колхицин</div>
                 </div>
-
-                <div id="item-kcl" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">💧</span>
-                    <div>
-                        <div class="font-medium">KCl (0.075M)</div>
-                        <div class="text-xs text-slate-500">Гипотонический раствор</div>
-                    </div>
+                <div id="item-kcl" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">💧</span>
+                    <div class="text-xs font-medium">KCl (0.075M)</div>
                 </div>
-
-                <div id="item-fixative" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🧊</span>
-                    <div>
-                        <div class="font-medium">Фиксатор Карнуа</div>
-                        <div class="text-xs text-slate-500">Метанол/Уксусная к-та</div>
-                    </div>
+                <div id="item-fixative" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🧊</span>
+                    <div class="text-xs font-medium">Фиксатор</div>
                 </div>
-
-                <div id="item-microscope" draggable="true" ondragstart="drag(event)" class="bg-slate-50 border border-slate-200 p-4 rounded-lg flex items-center gap-3 hover:border-slate-300 hover:bg-slate-100">
-                    <span class="text-3xl">🔬</span>
-                    <div>
-                        <div class="font-medium">Микроскоп</div>
-                        <div class="text-xs text-slate-500">Анализ метафазных пластинок</div>
-                    </div>
+                <div id="item-microscope" draggable="true" class="bg-slate-50 border p-3 rounded-xl flex items-center gap-3 hover:border-blue-300 transition-all group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🔬</span>
+                    <div class="text-xs font-medium">Микроскоп</div>
                 </div>
-
             </aside>
 
-            <main class="w-1/2 p-10 flex flex-col items-center justify-center relative">
-                <div class="text-sm text-slate-400 absolute top-4 left-4">Рабочий стол</div>
-                
-                <div id="workbench-target" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" class="relative p-8 border-4 border-dashed border-slate-300 rounded-2xl w-64 h-80 flex flex-col items-center justify-end transition-all">
-                    
-                    <div id="tube-visual" class="relative w-16 h-48 border-4 border-slate-400 rounded-b-full rounded-t-md overflow-hidden bg-white/50 shadow-inner">
-                        <div id="liquid" class="liquid absolute bottom-0 w-full h-0 bg-transparent"></div>
+            <main class="flex-grow flex flex-col items-center justify-center relative p-10">
+                <div id="workbench" class="w-64 h-80 border-2 border-dashed border-slate-300 rounded-3xl flex flex-col items-center justify-end p-6 transition-all relative">
+                    <div id="tube-container" class="relative w-16 h-48 border-4 border-slate-400 rounded-b-full rounded-t-lg bg-white/40 overflow-hidden shadow-inner transition-transform duration-500">
+                        <div id="liquid" class="liquid absolute bottom-0 w-full h-0"></div>
                     </div>
-                    
-                    <div class="mt-4 text-center font-medium text-slate-600">Рабочий образец</div>
-                    <div id="sample-status" class="text-xs text-slate-400 mt-1">Пустая пробирка</div>
+                    <p id="sample-status" class="mt-6 text-[10px] font-bold uppercase text-slate-400 tracking-tighter">Пустой штатив</p>
+                    <div id="drop-hint" class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity pointer-events-none">
+                        <span class="bg-blue-500 text-white text-[10px] px-2 py-1 rounded">СЮДА</span>
+                    </div>
                 </div>
                 
-                <div id="incubation-overlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center z-30 rounded-xl m-4 text-white">
-                    <div class="text-6xl animate-pulse mb-4">⏱️</div>
-                    <div class="text-xl font-semibold">Идет инкубация (72 часа)...</div>
-                    <div class="text-sm opacity-70">Лимфоциты делятся</div>
+                <div id="incubation-overlay" class="absolute inset-0 bg-slate-900/90 z-40 hidden flex-col items-center justify-center text-white backdrop-blur-md">
+                    <div class="text-5xl animate-bounce mb-4">⏱️</div>
+                    <p class="text-xl font-light">Культивирование лимфоцитов...</p>
+                    <p class="text-xs opacity-50 mt-2 italic">72 часа при 37 градусах Цельсия</p>
                 </div>
             </main>
 
-            <aside class="w-1/4 bg-white border-l border-slate-200 p-8 flex flex-col">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-xl font-semibold">Протокол</h2>
-                    <span id="step-counter" class="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-1 rounded">ШАГ 1/7</span>
-                </div>
-                
-                <div class="flex-grow">
-                    <h3 id="step-title" class="text-lg font-medium mb-3 text-slate-800">Начало работы</h3>
-                    <p id="step-desc" class="text-slate-600 leading-relaxed text-sm">
-                        Для начала анализа необходимо поместить образец венозной крови пациента в рабочую пробирку в штативе. Найдите пробирку с кровью в инвентаре и перетащите её на рабочий образец на столе.
+            <aside class="w-80 bg-white border-l p-8 flex flex-col shadow-inner">
+                <h2 id="step-title" class="text-xl font-semibold mb-4">Загрузка...</h2>
+                <p id="step-desc" class="text-sm text-slate-500 leading-relaxed mb-8"></p>
+                <div class="mt-auto p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <p class="text-[11px] text-blue-800 leading-tight">
+                        <strong class="block mb-1">СОВЕТ:</strong>
+                        Зажмите левой кнопкой мыши нужный предмет слева и перетащите его в пунктирную зону по центру.
                     </p>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg mt-auto text-xs text-slate-500">
-                    <span class="font-semibold text-slate-700">Подсказка:</span> Перетаскивайте нужные предметы из левой панели на мерцающую зону в центре стола.
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="results-page" class="page hidden-page flex-grow flex flex-col h-screen bg-slate-950 p-6 overflow-y-auto text-slate-200 z-50">
-        <header class="flex justify-between items-center pb-6 border-b border-slate-800 mb-8">
-            <h1 class="text-3xl font-bold tracking-tight text-white">Результаты Микроскопии</h1>
-            <button onclick="location.reload()" class="bg-white/10 hover:bg-white/20 text-white text-sm py-2 px-5 rounded-lg transition-colors">
-                Начать заново
-            </button>
-        </header>
-        
-        <div class="flex-grow flex flex-col md:flex-row gap-8 items-center justify-center max-w-7xl mx-auto w-full">
-            <div class="md:w-1/2 flex flex-col items-center">
-                <div class="bg-white p-4 rounded-xl shadow-2xl">
-                    <div id="karyotype-image-placeholder" class="w-[400px] h-[300px] border-2 border-slate-200 flex items-center justify-center text-slate-400 text-sm rounded bg-slate-50">
-                         [ Здесь будет твоя картинка кариотипа ]
-                         </div>
+    <div id="results-page" class="hidden-page flex-grow bg-slate-950 p-6 flex flex-col items-center justify-center text-white overflow-y-auto">
+        <div class="max-w-4xl w-full grid md:grid-cols-2 gap-10 items-center">
+            <div class="bg-white p-4 rounded-xl shadow-2xl">
+                <div id="karyotype-img" class="aspect-[4/3] bg-slate-100 border-2 border-slate-200 rounded flex items-center justify-center text-slate-400 text-xs text-center p-4">
+                    [ ИЗОБРАЖЕНИЕ КАРИОТИПА ]
                 </div>
-                <p class="text-xs text-slate-500 mt-3 font-mono">Визуализация метафазной пластинки (G-окрашивание)</p>
             </div>
-            
-            <div class="md:w-1/2 bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl">
-                <div id="result-diagnosis-badg" class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3"></div>
-                <h2 id="result-title" class="text-3xl font-semibold mb-5 text-white"></h2>
-                <div class="text-sm font-mono text-blue-400 mb-6 p-3 bg-blue-950/50 rounded border border-blue-900">Формула: <span id="result-formula"></span></div>
-                
-                <div class="prose prose-sm prose-invert text-slate-400 leading-relaxed space-y-4">
-                    <p id="result-expl-1"></p>
-                    <p id="result-expl-2" class="text-xs border-t border-slate-800 pt-4 opacity-70"></p>
-                </div>
+            <div>
+                <span id="diag-badge" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4 inline-block"></span>
+                <h2 id="diag-title" class="text-3xl font-bold mb-4"></h2>
+                <div id="diag-formula" class="font-mono text-blue-400 bg-blue-400/10 p-2 rounded text-sm mb-6 border border-blue-400/20"></div>
+                <p id="diag-desc" class="text-slate-400 text-sm leading-relaxed mb-6"></p>
+                <button onclick="location.reload()" class="bg-white text-black text-xs font-bold py-3 px-8 rounded-full hover:bg-slate-200 transition-all">ПРОВЕСТИ НОВЫЙ ТЕСТ</button>
             </div>
         </div>
     </div>
 
     <script>
-        // === ДАННЫЕ ПРОТОКОЛА ===
-        const protocolSteps = [
-            {
-                requiredItem: 'item-blood',
-                title: 'Забор и внесение материала',
-                desc: 'Перетащите пробирку с кровью пациента на штатив на рабочем столе. В пробирке уже содержится гепарин для предотвращения свертывания.',
-                status: 'Образец крови внесен',
-                liquidHeight: '25%',
-                liquidColor: '#dc2626' // Ярко-красный
-            },
-            {
-                requiredItem: 'item-pha',
-                title: 'Стимуляция митоза',
-                desc: 'Добавьте Фитогемагглютинин (ФГА). Это вещество заставит Т-лимфоциты, которые обычно не делятся в русле крови, начать митоз. Перетащите флакон ФГА на рабочий образец.',
-                status: 'Добавлен ФГА',
-                liquidHeight: '30%',
-                liquidColor: '#b91c1c' // Темнее
-            },
-            {
-                requiredItem: 'item-incubator',
-                title: 'Культивирование',
-                desc: 'Поместите пробирку в СО2-инкубатор. Необходимо выдержать образец при 37°C в течение 72 часов для получения достаточного количества делящихся клеток. Перетащите иконку Инкубатора на образец.',
-                status: 'Инкубация завершена',
-                liquidHeight: '30%',
-                liquidColor: '#991b1b', // Осадок
-                action: 'incubate'
-            },
-            {
-                requiredItem: 'item-colchicine',
-                title: 'Остановка митоза',
-                desc: 'Нам нужны клетки на стадии метафазы. Добавьте Колхицин. Он разрушает веретено деления, блокируя клетки именно в тот момент, когда хромосомы максимально конденсированы и видны.',
-                status: 'Митоз остановлен (Колхицин)',
-                liquidHeight: '35%',
-                liquidColor: '#7f1d1d'
-            },
-            {
-                requiredItem: 'item-kcl',
-                title: 'Гипотоническая обработка',
-                desc: 'Клетки слишком плотные. Добавьте слабый раствор KCl. Из-за разницы осмотического давления вода пойдет в клетки, они набухнут, что позволит хромосомам "разойтись", не перекрывая друг друга.',
-                status: 'Клетки разбухли (KCl)',
-                liquidHeight: '80%', // Набухание
-                liquidColor: '#fca5a5' // Светлеет
-            },
-            {
-                requiredItem: 'item-fixative',
-                title: 'Фиксация',
-                desc: 'Чтобы закрепить состояние клеток, добавьте фиксатор Карнуа (смесь спирта и кислоты). Это "заморозит" структуру и отмоет образец от остатков эритроцитов.',
-                status: 'Клетки зафиксированы',
-                liquidHeight: '60%',
-                liquidColor: '#e2e8f0' // Серовато-белый осадок
-            },
-            {
-                requiredItem: 'item-microscope',
-                title: 'Микроскопия',
-                desc: 'Образец готов. Капните его на стекло, перетащите Микроскоп на образец для перехода к анализу кариотипа.',
-                status: 'Анализ завершен',
-                liquidHeight: '60%',
-                action: 'finish'
-            }
+        // ДАННЫЕ
+        const steps = [
+            { req: 'item-blood', title: 'Сбор материала', desc: 'Начните с внесения образца венозной крови в пробирку. В ней уже есть гепарин.', status: 'Кровь внесена', h: '25%', c: '#ef4444' },
+            { req: 'item-pha', title: 'Стимуляция митоза', desc: 'Добавьте ФГА (фитогемагглютинин). Без него лимфоциты не будут делиться.', status: 'Добавлен ФГА', h: '30%', c: '#dc2626' },
+            { req: 'item-incubator', title: 'Инкубация', desc: 'Поместите пробирку в инкубатор на 72 часа для роста клеточной культуры.', status: 'Рост завершен', h: '30%', c: '#b91c1c', special: 'wait' },
+            { req: 'item-colchicine', title: 'Стоп-митоз', desc: 'Добавьте колхицин. Он остановит деление клеток на стадии метафазы.', status: 'Метафаза зафиксирована', h: '35%', c: '#991b1b' },
+            { req: 'item-kcl', title: 'Гипотония', desc: 'Добавьте KCl. Клетки должны набухнуть, чтобы хромосомы разошлись.', status: 'Клетки набухли', h: '80%', c: '#fca5a5', special: 'swell' },
+            { req: 'item-fixative', title: 'Фиксация', desc: 'Добавьте фиксатор Карнуа для закрепления структуры хромосом.', status: 'Образец зафиксирован', h: '60%', c: '#f1f5f9' },
+            { req: 'item-microscope', title: 'Микроскопия', desc: 'Все готово. Перенесите микроскоп на образец для анализа кариотипа.', status: 'Анализ...', h: '60%', c: '#f1f5f9', special: 'end' }
         ];
 
-        // === ДАННЫЕ КАРИОТИПОВ (РАНДОМ) ===
-        const karyotypeDatabase = [
-            {
-                type: 'classic',
-                diagnosis: 'Норма',
-                badgeStyle: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-                title: 'Классический мужской кариотип',
-                formula: '46, XY',
-                expl1: 'Анализ не выявил числовых или грубых структурных аномалий. В ядре присутствует пол
+        const diagnoses = [
+            { type: 'norm', title: 'Нормальный кариотип', formula: '46, XY', badge: 'bg-green-500', desc: 'Числовые и структурные аномалии не обнаружены. Все 23 пары хромосом в норме.' },
+            { type: 'down', title: 'Синдром Дауна', formula: '47, XY, +21', badge: 'bg-red-500', desc: 'Обнаружена дополнительная 21-я хромосома (трисомия). Это самая частая генетическая патология.' },
+            { type: 'edw', title: 'Синдром Эдвардса', formula: '47, XX, +18', badge: 'bg-red-500', desc: 'Обнаружена трисомия по 18-й паре хромосом. Вызывает множественные пороки развития.' },
+            { type: 'pat', title: 'Синдром Патау', formula: '47, XY, +13', badge: 'bg-red-500', desc: 'Обнаружена трисомия по 13-й паре хромосом. Сопровождается тяжелыми нарушениями ЦНС.' }
+        ];
+
+        let currentStep = 0;
+
+        // ИНИЦИАЛИЗАЦИЯ КНОПКИ
+        document.getElementById('main-start-btn').addEventListener('click', () => {
+            document.getElementById('landing-page').classList.add('hidden-page');
+            document.getElementById('lab-page').classList.remove('hidden-page');
+            updateUI();
+        });
+
+        // DRAG AND DROP ЛОГИКА
+        const items = document.querySelectorAll('[draggable="true"]');
+        const workbench = document.getElementById('workbench');
+
+        items.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text', e.target.id);
+                hideError();
+            });
+        });
+
+        workbench.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            workbench.classList.add('drag-over');
+        });
+
+        workbench.addEventListener('dragleave', () => {
+            workbench.classList.remove('drag-over');
+        });
+
+        workbench.addEventListener('drop', (e) => {
+            e.preventDefault();
+            workbench.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text');
+            
+            if (draggedId === steps[currentStep].req) {
+                handleSuccess();
+            } else {
+                handleError(draggedId);
+            }
+        });
+
+        function handleSuccess() {
+            const step = steps[currentStep];
+            
+            if (step.special === 'wait') {
+                const overlay = document.getElementById('incubation-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    next();
+                }, 2500);
+            } else if (step.special === 'end') {
+                showFinal();
+            } else {
+                next();
+            }
+        }
+
+        function next() {
+            currentStep++;
+            updateUI();
+        }
+
+        function updateUI() {
+            const s = steps[currentStep];
+            document.getElementById('step-counter').textContent = `Шаг ${currentStep + 1}/7`;
+            document.getElementById('step-title').textContent = s.title;
+            document.getElementById('step-desc').textContent = s.desc;
+            document.getElementById('sample-status').textContent = s.status;
+            
+            const liq = document.getElementById('liquid');
+            liq.style.height = s.h;
+            liq.style.backgroundColor = s.c;
+
+            if (s.special === 'swell') {
+                document.getElementById('tube-container').style.transform = 'scale(1.15)';
+            } else {
+                document.getElementById('tube-container').style.transform = 'scale(1)';
+            }
+        }
+
+        function handleError(id) {
+            let msg = "Неверное действие. Сверьтесь с протоколом.";
+            if (id === 'item-microscope') msg = "Слишком рано! Материал еще не зафиксирован на стекле.";
+            if (id === 'item-fixative' && currentStep < 5) msg = "Ошибка! Сначала клетки должны набухнуть в KCl, иначе фиксатор их просто 'сожмет'.";
+            
+            const panel = document.getElementById('error-panel');
+            document.getElementById('error-message').textContent = msg;
+            panel.classList.remove('hidden', 'translate-y-full');
+        }
+
+        function hideError() {
+            document.getElementById('error-panel').classList.add('translate-y-full');
+        }
+
+        function showFinal() {
+            document.getElementById('lab-page').classList.add('hidden-page');
+            const resPage = document.getElementById('results-page');
+            resPage.classList.remove('hidden-page');
+            
+            const diag = diagnoses[Math.floor(Math.random() * diagnoses.length)];
+            
+            document.getElementById('diag-title').textContent = diag.title;
+            document.getElementById('diag-formula').textContent = `Кариотип: ${diag.formula}`;
+            document.getElementById('diag-desc').textContent = diag.desc;
+            
+            const badge = document.getElementById('diag-badge');
+            badge.textContent = (diag.type === 'norm') ? 'Здоров' : 'Патология';
+            badge.className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-4 inline-block ${diag.badge}`;
+
+            // Заглушка для фото
+            document.getElementById('karyotype-img').textContent = `[ Визуализация: ${diag.formula} ]`;
+        }
+    </script>
+</body>
+</html>
