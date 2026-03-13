@@ -3,333 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KaryoLab Pro — Виртуальная Лаборатория</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>KaryoLab Pro — Digital Medic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --bg: #f8fafc; --accent: #3b82f6; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #1e293b; overflow: hidden; }
-        .grid-bg { background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 30px 30px; }
+        :root { --bg: #0f172a; --accent: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; overflow: hidden; }
+        
+        /* Плавный переход страниц */
+        .page-fade { transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; }
+        .page-hidden { opacity: 0; pointer-events: none; transform: scale(0.98); position: absolute; width: 100%; }
+        
+        /* Игровой оверлей квеста */
+        #quest-overlay {
+            pointer-events: none;
+            z-index: 999;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8), transparent);
+        }
+        .quest-anim { animation: questIn 2.5s forwards; }
+        @keyframes questIn {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); filter: blur(10px); }
+            20% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+            80% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1) translateY(-20px); filter: blur(10px); }
+        }
+
+        /* Затемнение для переходов */
+        #flash-overlay {
+            position: fixed; inset: 0; background: black; z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+        }
+
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .liquid { transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.8s; }
-        .hidden-page { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.6s ease-out forwards; }
-        .table-shadow { box-shadow: 0 20px 50px -20px rgba(0,0,0,0.1); }
-        .reagent-img { width: 40px; height: 40px; object-fit: contain; }
         
-        /* Убираем стандартный маркер у details */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+        details[open] summary span:last-child { transform: rotate(180deg); }
     </style>
 </head>
-<body class="h-screen flex flex-col grid-bg">
+<body class="h-screen flex flex-col bg-slate-50">
 
-    <div id="landing-page" class="flex-grow flex flex-col items-center justify-center relative p-6 bg-slate-50 overflow-hidden">
-        <div class="absolute top-[-10%] left-[-5%] text-[20rem] opacity-[0.03] select-none">🧬</div>
-        <div class="absolute bottom-[-10%] right-[-5%] text-[15rem] opacity-[0.03] select-none rotate-12">🔬</div>
+    <div id="flash-overlay"></div>
+    <div id="quest-overlay" class="fixed inset-0 flex flex-col items-center justify-center opacity-0">
+        <div class="text-[10px] font-black tracking-[0.5em] text-blue-500 uppercase mb-2">Новая задача</div>
+        <h2 id="quest-title" class="text-4xl md:text-6xl font-black text-white text-center uppercase italic"></h2>
+        <div class="w-24 h-1 bg-blue-500 mt-4"></div>
+    </div>
 
-        <div class="z-10 text-center max-w-3xl animate-fade">
-            <div class="inline-block px-4 py-1.5 mb-6 text-[10px] font-bold tracking-[0.2em] text-blue-600 uppercase bg-blue-50 border border-blue-100 rounded-full">
-                Educational Platform 3.0
-            </div>
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 text-slate-900 tracking-tight">
-                Karyo<span class="text-blue-600">Lab</span>
-            </h1>
-            <p class="text-xl text-slate-500 mb-10 font-light leading-relaxed">
-                Интерактивный симулятор цитогенетической подготовки. 
-                Пройдите путь от забора цельной крови до анализа метафазных пластинок.
-            </p>
-            <button id="start-btn" class="group relative px-12 py-5 bg-slate-900 text-white rounded-full font-medium transition-all hover:pr-16 active:scale-95 shadow-2xl">
-                <span class="relative z-10">Начать симуляцию</span>
-                <span class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">→</span>
+    <div id="page-landing" class="page-fade h-screen flex flex-col items-center justify-center relative p-6 overflow-hidden">
+        <div class="absolute inset-0 opacity-[0.03] select-none pointer-events-none text-[30rem] flex items-center justify-center font-black">DNA</div>
+        <div class="z-10 text-center max-w-3xl">
+            <h1 class="text-6xl md:text-8xl font-black mb-6 text-slate-900 tracking-tighter">KARYO<span class="text-blue-600">LAB</span></h1>
+            <p class="text-lg text-slate-500 mb-10 font-light tracking-wide">Симулятор цитогенетической диагностики <br><span class="font-bold text-slate-400">v3.5 Professional Edition</span></p>
+            <button onclick="changePage('page-landing', 'page-phleb')" class="px-14 py-6 bg-slate-950 text-white rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-2xl">
+                Запустить протокол
             </button>
         </div>
     </div>
 
-    <div id="phlebotomy-page" class="hidden-page h-screen flex flex-col overflow-hidden bg-white">
-        <header class="h-16 bg-white border-b flex items-center px-8 z-50 shadow-sm">
-            <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold mr-4">✚</div>
-            <span class="text-sm font-bold tracking-tight text-slate-800 uppercase">Процедурный кабинет</span>
+    <div id="page-phleb" class="page-fade page-hidden h-screen flex flex-col bg-white">
+        <header class="h-20 border-b flex items-center px-10">
+            <span class="text-xs font-black tracking-widest text-slate-400 uppercase">Stage 01: Phlebotomy</span>
         </header>
-
-        <main class="flex-grow flex flex-col items-center justify-center relative p-12">
-            <div class="text-center mb-12 animate-fade">
-                <h2 class="text-3xl font-bold text-slate-900 mb-3">Забор венозной крови</h2>
-                <p class="text-sm text-slate-500 max-w-md mx-auto">Для культивирования лимфоцитов необходим вакутайнер с антикоагулянтом (Li-гепарин), предотвращающим свертывание крови.</p>
+        <main class="flex-grow flex flex-col items-center justify-center">
+            <div class="relative w-32 h-80 bg-slate-100 rounded-full border-8 border-slate-200 flex items-end justify-center pb-2 shadow-inner overflow-hidden">
+                <div class="absolute top-0 w-full h-12 bg-emerald-500 border-b-4 border-emerald-600 z-10"></div>
+                <div id="phleb-blood" class="w-full bg-red-600 h-0 transition-all duration-[2500ms]"></div>
             </div>
-
-            <div class="relative w-32 h-80 bg-slate-50 rounded-full border-4 border-slate-200 flex items-end justify-center pb-2 shadow-inner overflow-hidden animate-fade" style="animation-delay: 0.1s;">
-                <div class="absolute top-0 w-full h-12 bg-emerald-500 rounded-t-full border-b-4 border-slate-300 z-10"></div>
-                <div id="phleb-blood" class="w-full bg-red-600 rounded-b-full h-0 transition-all duration-[2000ms] ease-in-out"></div>
-            </div>
-
-            <div class="mt-12 flex gap-4 animate-fade" style="animation-delay: 0.2s;">
-                <button id="draw-blood-btn" class="px-8 py-4 bg-red-50 text-red-600 border border-red-200 rounded-full font-bold hover:bg-red-100 transition-all active:scale-95">
-                    Наполнить вакутайнер
-                </button>
-                <button id="to-lab-btn" class="hidden px-8 py-4 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all shadow-lg">
-                    Передать в лабораторию →
-                </button>
+            <div class="mt-16 flex flex-col items-center gap-6">
+                <button id="draw-btn" onclick="drawBlood()" class="px-10 py-5 bg-red-600 text-white rounded-full font-bold uppercase tracking-widest shadow-xl hover:bg-red-700 transition-all">Взять пробу</button>
+                <button id="to-lab-btn" onclick="changePage('page-phleb', 'page-lab')" class="hidden px-10 py-5 bg-slate-900 text-white rounded-full font-bold uppercase tracking-widest animate-bounce">Перейти в лабораторию →</button>
             </div>
         </main>
     </div>
 
-    <div id="lab-page" class="hidden-page h-screen flex flex-col overflow-hidden">
-        <header class="h-16 bg-white/80 backdrop-blur-md border-b flex items-center justify-between px-8 z-50">
-            <div class="flex items-center gap-4">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">K</div>
-                <span class="text-sm font-medium tracking-tight">KaryoLab <span class="text-slate-400">v3.0</span></span>
+    <div id="page-lab" class="page-fade page-hidden h-screen flex flex-col">
+        <header class="h-16 bg-white border-b flex items-center justify-between px-10 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-6 h-6 bg-blue-600 rounded"></div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Lab Environment</span>
             </div>
-            <div id="step-badge" class="px-4 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-full">ШАГ 1/6</div>
+            <div id="step-badge" class="px-4 py-1 bg-slate-900 text-white text-[9px] font-bold rounded-full">STEP 1/6</div>
         </header>
 
-        <div class="flex-grow flex overflow-hidden">
-            <aside class="w-80 bg-slate-50 border-r p-6 flex flex-col gap-6 overflow-y-auto">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Реагенты</h3>
-                <div class="grid gap-3" id="inventory">
-                    <div id="item-pha" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab active:cursor-grabbing">
-                        <img src="pha.png" onerror="this.src='https://placehold.co/40x40/eff6ff/3b82f6?text=PHA'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">ФГА</div><div class="text-[10px] text-slate-400">Митоген</div></div>
+        <div class="flex-grow flex">
+            <aside class="w-80 bg-slate-50 border-r p-8 flex flex-col gap-4">
+                <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Inventory</h3>
+                <div id="inventory" class="space-y-3">
                     </div>
-                    <div id="item-incubator" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab">
-                        <img src="incubator.png" onerror="this.src='https://placehold.co/40x40/f8fafc/64748b?text=INC'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">Инкубатор</div><div class="text-[10px] text-slate-400">37°C / 72ч</div></div>
-                    </div>
-                    <div id="item-colchicine" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab">
-                        <img src="colchicine.png" onerror="this.src='https://placehold.co/40x40/fff7ed/ea580c?text=COL'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">Колхицин</div><div class="text-[10px] text-slate-400">Стоп-митоз</div></div>
-                    </div>
-                    <div id="item-kcl" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab">
-                        <img src="kcl.avif" onerror="this.src='https://placehold.co/40x40/ecfeff/06b6d4?text=KCl'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">KCl</div><div class="text-[10px] text-slate-400">Гипотония</div></div>
-                    </div>
-                    <div id="item-fixative" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab">
-                        <img src="fixative.png" onerror="this.src='https://placehold.co/40x40/eef2ff/4f46e5?text=FIX'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">Фиксатор</div><div class="text-[10px] text-slate-400">Карнуа</div></div>
-                    </div>
-                    <div id="item-microscope" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all group cursor-grab">
-                        <img src="microscope.png" onerror="this.src='https://placehold.co/40x40/f1f5f9/0f172a?text=MIC'" class="reagent-img group-hover:scale-110 transition-transform">
-                        <div><div class="text-xs font-bold">Анализ</div><div class="text-[10px] text-slate-400">Микроскопия</div></div>
-                    </div>
-                </div>
             </aside>
 
-            <main class="flex-grow flex items-center justify-center p-12 relative overflow-hidden">
-                <div class="absolute bottom-0 w-full h-32 bg-slate-200/50 border-t border-slate-300"></div>
-                <div id="drop-zone" class="relative z-10 w-80 h-[450px] table-shadow bg-white/40 border-2 border-dashed border-slate-300 rounded-[40px] flex flex-col items-center justify-end pb-12 transition-all">
-                    <div id="tube-body" class="relative w-20 h-64 border-[6px] border-slate-400/80 rounded-b-full rounded-t-xl bg-white/60 shadow-inner overflow-hidden transition-transform duration-700">
-                        <div id="liquid-fill" class="liquid absolute bottom-0 w-full" style="height: 25%; background-color: #dc2626;"></div>
+            <main class="flex-grow flex items-center justify-center relative bg-slate-100/50">
+                <div id="drop-zone" class="w-72 h-[450px] bg-white border-2 border-dashed border-slate-300 rounded-[50px] flex flex-col items-center justify-end pb-12 transition-all shadow-2xl">
+                    <div id="tube-body" class="relative w-20 h-64 border-4 border-slate-300 rounded-b-full rounded-t-xl bg-white/80 overflow-hidden transition-all duration-700">
+                        <div id="liquid-fill" class="liquid absolute bottom-0 w-full bg-red-600" style="height: 20%"></div>
                     </div>
                     <div class="mt-8 text-center">
-                        <div id="tube-label" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Образец RU-77</div>
-                        <div id="tube-status" class="text-xs font-medium text-slate-600 italic">Кровь получена</div>
+                        <div id="tube-status" class="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">Система готова</div>
                     </div>
                 </div>
-                <div id="wait-overlay" class="absolute inset-0 z-50 glass hidden flex-col items-center justify-center text-center animate-fade">
-                    <div class="text-6xl mb-6">⏱️</div>
-                    <h2 class="text-2xl font-bold mb-2">Процесс культивирования</h2>
-                    <p class="text-slate-500 max-w-xs text-sm">72 часа при 37°C. Т-лимфоциты вступают в фазу активного деления.</p>
+                <div id="incubator-ui" class="absolute inset-0 bg-slate-900/90 hidden flex flex-col items-center justify-center text-white z-[60] animate-fade">
+                    <div class="text-6xl mb-6 animate-pulse">🌡️</div>
+                    <div class="text-2xl font-black mb-2 tracking-tighter">37.0°C — СТАБИЛЬНО</div>
+                    <p class="text-slate-400 text-sm">Культивирование лимфоцитов...</p>
                 </div>
             </main>
 
             <aside class="w-96 bg-white border-l p-10 flex flex-col">
-                <h2 id="protocol-title" class="text-2xl font-bold mb-4 text-slate-900">Загрузка...</h2>
-                <p id="protocol-desc" class="text-slate-500 leading-relaxed text-sm font-light mb-10"></p>
-                <div id="error-box" class="hidden p-4 rounded-2xl bg-red-50 border border-red-100 mb-6 animate-fade">
-                    <p id="error-txt" class="text-[11px] text-red-700 font-bold uppercase"></p>
-                </div>
-                <div class="mt-auto p-6 rounded-3xl bg-slate-900 text-white shadow-xl">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Цель этапа</div>
-                    <p id="step-goal" class="text-xs leading-relaxed opacity-80"></p>
+                <h2 id="instr-title" class="text-2xl font-black mb-4 uppercase tracking-tighter"></h2>
+                <p id="instr-desc" class="text-slate-500 text-sm leading-relaxed font-light"></p>
+                
+                <div id="error-alert" class="hidden mt-6 p-4 bg-red-50 text-red-600 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+                    ⚠️ Нарушен порядок протокола!
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="results-page" class="hidden-page fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-6 overflow-y-auto">
-        <div class="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-start py-10">
-            <div class="sticky top-10 bg-white rounded-[2rem] p-4 shadow-2xl aspect-square flex items-center justify-center overflow-hidden">
-                <img id="final-img" src="" class="max-w-full max-h-full object-contain animate-fade">
+    <div id="page-res" class="page-fade page-hidden fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-6 overflow-y-auto">
+        <div class="max-w-6xl w-full grid lg:grid-cols-2 gap-16 py-10 items-start">
+            <div class="bg-white rounded-[3rem] p-6 shadow-[0_0_50px_rgba(59,130,246,0.2)] aspect-square flex items-center justify-center">
+                <img id="final-img" src="" class="max-w-full max-h-full object-contain">
             </div>
-            
-            <div class="text-white pb-10">
-                <div id="res-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-6"></div>
-                <h2 id="res-title" class="text-4xl font-bold mb-4 tracking-tight"></h2>
-                <div id="res-formula" class="font-mono text-blue-400 bg-blue-400/10 p-3 rounded-xl border border-blue-400/30 mb-6 inline-block"></div>
-                <p id="res-desc" class="text-slate-400 leading-relaxed text-sm mb-8"></p>
+            <div class="text-white">
+                <div id="res-badge" class="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6"></div>
+                <h2 id="res-title" class="text-5xl font-black mb-4 tracking-tighter"></h2>
+                <div id="res-formula" class="font-mono text-xl text-blue-400 mb-8 block"></div>
+                <p id="res-desc" class="text-slate-400 text-base leading-relaxed mb-12 font-light"></p>
                 
-                <div id="pathology-details" class="space-y-3 mb-10 hidden">
-                    </div>
+                <div id="pathology-accordion" class="space-y-4 mb-12"></div>
 
-                <button onclick="location.reload()" class="w-full py-4 bg-white text-black rounded-full font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Новое исследование</button>
+                <button onclick="location.reload()" class="w-full py-5 bg-white text-black rounded-full font-black text-xs uppercase tracking-[0.3em] hover:bg-blue-500 hover:text-white transition-all">Перезапустить симуляцию</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ПРОТОКОЛ ЛАБОРАТОРИИ (Без забора крови) ---
-        const protocol = [
-            { req: 'item-pha', title: 'Добавление митогена', desc: 'Введите ФГА в образец венозной крови для запуска деления клеток.', goal: 'Запустить бласттрансформацию Т-клеток.', h: '30%', c: '#991b1b', status: 'Митоген добавлен' },
-            { req: 'item-incubator', title: 'Культивирование', desc: 'Инкубация при 37°C и 5% CO2 для накопления митозов.', goal: '72 часа роста культуры.', h: '30%', c: '#7f1d1d', special: 'wait', status: 'Инкубация завершена' },
-            { req: 'item-colchicine', title: 'Остановка митоза', desc: 'Колхицин разрушает веретено деления, блокируя клетки на стадии метафазы.', goal: 'Максимальная конденсация хромосом.', h: '35%', c: '#450a0a', status: 'Митоз заблокирован' },
-            { req: 'item-kcl', title: 'Гипотония', desc: 'Обработка 0.075M раствором KCl для осмотического набухания клеток.', goal: 'Развести хромосомы для визуализации.', h: '85%', c: '#fca5a5', special: 'swell', status: 'Клетки набухли' },
-            { req: 'item-fixative', title: 'Фиксация', desc: 'Используйте охлажденную смесь Карнуа (метанол:ледяная уксусная кислота 3:1).', goal: 'Зафиксировать клеточные структуры.', h: '65%', c: '#f1f5f9', status: 'Фиксация завершена' },
-            { req: 'item-microscope', title: 'Микроскопия', desc: 'Нанесение суспензии на стекло, G-окрашивание и анализ.', goal: 'Поиск и идентификация метафазных пластинок.', h: '65%', c: '#f1f5f9', special: 'end', status: 'Микроскопия...' }
+        // Данные
+        const items = [
+            { id: 'item-pha', n: 'ФГА', t: 'Митоген', c: 'bg-blue-100 text-blue-600' },
+            { id: 'item-incubator', n: '37°C', t: 'Инкубатор', c: 'bg-slate-200 text-slate-600' },
+            { id: 'item-colchicine', n: 'COL', t: 'Колхицин', c: 'bg-orange-100 text-orange-600' },
+            { id: 'item-kcl', n: 'KCl', t: 'Гипотония', c: 'bg-cyan-100 text-cyan-600' },
+            { id: 'item-fix', n: 'FIX', t: 'Карнуа', c: 'bg-indigo-100 text-indigo-600' },
+            { id: 'item-micro', n: '🔬', t: 'Анализ', c: 'bg-slate-900 text-white' }
         ];
 
-        // --- БАЗА ЗНАНИЙ (Патологии детализированы) ---
-        const results = [
-            { file: 'norm_m.jpg', title: 'Нормальный кариотип', formula: '46, XY', desc: 'Количественные и структурные аномалии хромосом не выявлены. Полный диплоидный набор, мужской пол.', badge: 'bg-emerald-500', isPathology: false },
-            { file: 'norm_f.jpg', title: 'Нормальный кариотип', formula: '46, XX', desc: 'Количественные и структурные аномалии хромосом не выявлены. Полный диплоидный набор, женский пол.', badge: 'bg-emerald-500', isPathology: false },
+        const protocol = [
+            { req: 'item-pha', title: 'Стимуляция', desc: 'ФГА превращает лимфоциты в делящиеся бласты. Без него мы не получим метафаз.', h: '25%', c: '#991b1b', goal: 'Запустить митоз' },
+            { req: 'item-incubator', title: 'Рост', desc: '72 часа в термостате. Клетки проходят фазы S и G2, готовясь к делению.', h: '25%', c: '#7f1d1d', special: 'wait', goal: 'Вырастить культуру' },
+            { req: 'item-colchicine', title: 'Блокада', desc: 'Колхицин останавливает деление в метафазе, разрушая нити веретена.', h: '30%', c: '#450a0a', goal: 'Остановить деление' },
+            { req: 'item-kcl', title: 'Набухание', desc: 'KCl делает клетки огромными. Это нужно, чтобы хромосомы не слипались.', h: '80%', c: '#fca5a5', special: 'swell', goal: 'Гипотонический шок' },
+            { req: 'item-fix', title: 'Фиксация', desc: 'Смесь спирта и кислоты мгновенно останавливает все процессы в клетке.', h: '60%', c: '#f1f5f9', goal: 'Зафиксировать образец' },
+            { req: 'item-micro', title: 'Диагностика', desc: 'Финальный этап. Окрашивание и поиск отклонений в кариотипе.', h: '60%', c: '#f1f5f9', special: 'end', goal: 'Найти патологию' }
+        ];
+
+        const allResults = [
+            { file: 'norm_m.jpg', title: 'Норма (Male)', formula: '46, XY', desc: 'Патологий не выявлено.', badge: 'bg-emerald-500', isPathology: false },
+            { file: 'norm_f.jpg', title: 'Норма (Female)', formula: '46, XX', desc: 'Хромосомный баланс соблюден.', badge: 'bg-emerald-500', isPathology: false },
             { 
-                file: 'down.jpg', title: 'Синдром Дауна', formula: '47, XY, +21', desc: 'Анеуплоидия. Выявлена полная трисомия по 21-й паре аутосом.', badge: 'bg-red-500', isPathology: true,
+                file: 'down.jpg', title: 'Синдром Дауна', formula: '47, XY, +21', desc: 'Трисомия по 21 хромосоме.', badge: 'bg-red-500', isPathology: true,
                 details: [
-                    { title: 'Вид наследственности', text: 'В 95% случаев спорадическое событие (простое нерасхождение). В 4-5% случаев — транслокационная форма (часто робертсоновская транслокация), которая может наследоваться от одного из родителей-носителей.' },
-                    { title: 'Мутация', text: 'Кариотип 47,XX,+21 или 47,XY,+21. Наличие дополнительного генетического материала 21-й хромосомы.' },
-                    { title: 'Патогенез', text: 'Эффект дозы генов (гиперэкспрессия генов 21 хромосомы: APP, SOD1, DYRK1A). Это приводит к нарушению нейрогенеза, оксидативному стрессу и раннему развитию амилоидоза (высокий риск болезни Альцгеймера).' },
-                    { title: 'Симптомы', text: 'Мышечная гипотония, плоский профиль лица, эпикант, брахидактилия, поперечная ладонная складка. В 40-50% случаев — врожденные пороки сердца (дефект атриовентрикулярной коммуникации).' },
-                    { title: 'Диагностика', text: 'Пренатально: УЗИ (увеличение ТВП, гипоплазия носовой кости), биохимический скрининг (снижение PAPP-A, повышение ХГЧ), НИПТ. Постнатально: кариотипирование.' }
+                    { title: 'Мутация', text: 'Лишняя хромосома в 21-й паре вследствие нерасхождения в мейозе.' },
+                    { title: 'Патогенез', text: 'Перепроизводство белков, кодируемых 21-й хромосомой, ведет к нарушениям в сердце и ЦНС.' },
+                    { title: 'Симптомы', text: 'Эпикант, мышечная гипотония, пороки сердца, задержка интеллектуального развития.' },
+                    { title: 'Диагностика', text: 'НИПТ, амниоцентез, кариотипирование.' }
                 ]
             },
             { 
-                file: 'edwards.jpg', title: 'Синдром Эдвардса', formula: '47, XX, +18', desc: 'Выявлена трисомия 18. Крайне тяжелая хромосомная патология.', badge: 'bg-red-500', isPathology: true,
+                file: 'edwards.jpg', title: 'Синдром Эдвардса', formula: '47, XX, +18', desc: 'Трисомия 18.', badge: 'bg-red-500', isPathology: true,
                 details: [
-                    { title: 'Вид наследственности', text: 'Спорадическое событие. Возникает de novo из-за нерасхождения хромосом в мейозе (чаще в материнском оогенезе).' },
-                    { title: 'Мутация', text: 'Кариотип 47,XX,+18 или 47,XY,+18. Наличие третьей копии 18-й хромосомы.' },
-                    { title: 'Патогенез', text: 'Тяжелый дисбаланс генома, нарушающий эмбриональное развитие на ранних этапах. Приводит к множественным дефектам формирования внутренних органов (сердце, почки) и ЦНС.' },
-                    { title: 'Симптомы', text: 'Специфическое флексорное положение кистей (перекрещивание пальцев), стопа-«качалка», микрогнатия, низко посаженные уши, тяжелые пороки сердца (ДМЖП) и задержка развития.' },
-                    { title: 'Диагностика', text: 'УЗИ плода (множественные пороки, задержка роста), инвазивная диагностика (амниоцентез/биопсия хориона) с последующим кариотипированием.' }
-                ]
-            },
-            { 
-                file: 'patau.jpg', title: 'Синдром Патау', formula: '47, XY, +13', desc: 'Трисомия по 13-й паре. Характеризуется тяжелыми дефектами развития срединных структур.', badge: 'bg-red-500', isPathology: true,
-                details: [
-                    { title: 'Вид наследственности', text: 'Преимущественно спорадическое нерасхождение. Реже — робертсоновская транслокация с вовлечением 13-й хромосомы.' },
-                    { title: 'Мутация', text: 'Кариотип 47,XX,+13 или 47,XY,+13.' },
-                    { title: 'Патогенез', text: 'Нарушение формирования срединных структур тела в эмбриогенезе (дефекты развития переднего мозга, лицевого скелета).' },
-                    { title: 'Симптомы', text: 'Голопрозэнцефалия, расщелина верхней губы и неба ("заячья губа", "волчья пасть"), микрофтальмия, полидактилия, тяжелые дефекты сердца и почек.' },
-                    { title: 'Диагностика', text: 'Пренатальный скрининг (УЗИ выявляет грубые пороки развития мозга и лица), НИПТ, подтверждение цитогенетическим методом.' }
+                    { title: 'Мутация', text: 'Полная трисомия 18-й пары.' },
+                    { title: 'Патогенез', text: 'Грубый генетический дисбаланс, вызывающий критические пороки внутренних органов.' },
+                    { title: 'Симптомы', text: 'Специфическая форма черепа, скрещенные пальцы рук, стопа-качалка.' },
+                    { title: 'Диагностика', text: 'УЗИ-скрининг (кисты сосудистых сплетений), инвазивные тесты.' }
                 ]
             }
         ];
 
         let currentIdx = 0;
+        let shuffled = [...allResults].sort(() => Math.random() - 0.5);
 
-        // --- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ СТРАНИЦ ---
-        document.getElementById('start-btn').onclick = () => {
-            document.getElementById('landing-page').classList.add('hidden-page');
-            document.getElementById('phlebotomy-page').classList.remove('hidden-page');
-        };
+        // --- ЛОГИКА ИГРЫ ---
 
-        // Забор крови
-        document.getElementById('draw-blood-btn').onclick = function() {
-            this.classList.add('hidden');
-            const blood = document.getElementById('phleb-blood');
-            blood.style.height = '75%'; // Имитация наполнения
+        function showQuest(text) {
+            const overlay = document.getElementById('quest-overlay');
+            const title = document.getElementById('quest-title');
+            title.textContent = text;
+            overlay.classList.remove('quest-anim');
+            void overlay.offsetWidth; // Trigger reflow
+            overlay.classList.add('quest-anim');
+        }
+
+        function changePage(from, to) {
+            const flash = document.getElementById('flash-overlay');
+            flash.style.opacity = '1';
             
             setTimeout(() => {
+                document.getElementById(from).classList.add('page-hidden');
+                document.getElementById(to).classList.remove('page-hidden');
+                flash.style.opacity = '0';
+                
+                // Триггер квеста при входе в лабу или кабинет
+                if (to === 'page-phleb') showQuest('Забор крови');
+                if (to === 'page-lab') {
+                    renderInventory();
+                    updateLabUI();
+                    showQuest(protocol[0].goal);
+                }
+            }, 400);
+        }
+
+        function drawBlood() {
+            document.getElementById('draw-btn').classList.add('hidden');
+            document.getElementById('phleb-blood').style.height = '85%';
+            setTimeout(() => {
                 document.getElementById('to-lab-btn').classList.remove('hidden');
-            }, 2000);
-        };
+            }, 2500);
+        }
 
-        // Переход в лабораторию
-        document.getElementById('to-lab-btn').onclick = () => {
-            document.getElementById('phlebotomy-page').classList.add('hidden-page');
-            document.getElementById('lab-page').classList.remove('hidden-page');
-            updateUI();
-        };
+        function renderInventory() {
+            const inv = document.getElementById('inventory');
+            inv.innerHTML = items.map(i => `
+                <div id="${i.id}" draggable="true" class="glass p-4 rounded-2xl flex items-center gap-4 cursor-grab active:scale-95 transition-all group">
+                    <div class="w-12 h-12 ${i.c} rounded-xl flex items-center justify-center font-black text-xs">${i.n}</div>
+                    <div><div class="text-[11px] font-black uppercase">${i.n}</div><div class="text-[9px] text-slate-400 uppercase tracking-widest">${i.t}</div></div>
+                </div>
+            `).join('');
 
-        // --- ЛОГИКА ЛАБОРАТОРИИ ---
-        document.querySelectorAll('[draggable="true"]').forEach(i => {
-            i.ondragstart = e => {
-                e.dataTransfer.setData('id', e.target.closest('[id]').id);
-                document.getElementById('error-box').classList.add('hidden');
-            };
-        });
+            inv.querySelectorAll('[draggable]').forEach(el => {
+                el.ondragstart = e => e.dataTransfer.setData('id', el.id);
+            });
+        }
 
+        // Drop Zone
         const dz = document.getElementById('drop-zone');
-        dz.ondragover = e => { e.preventDefault(); dz.style.borderColor = '#3b82f6'; };
-        dz.ondragleave = () => { dz.style.borderColor = '#e2e8f0'; };
+        dz.ondragover = e => { e.preventDefault(); dz.style.scale = '1.02'; dz.style.borderColor = '#3b82f6'; };
+        dz.ondragleave = () => { dz.style.scale = '1'; dz.style.borderColor = '#e2e8f0'; };
         dz.ondrop = e => {
             e.preventDefault();
-            dz.style.borderColor = '#e2e8f0';
+            dz.style.scale = '1';
             const id = e.dataTransfer.getData('id');
             if (id === protocol[currentIdx].req) handleStep();
-            else showError();
+            else {
+                const err = document.getElementById('error-alert');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.add('hidden'), 2000);
+            }
         };
 
         function handleStep() {
             const s = protocol[currentIdx];
             if (s.special === 'wait') {
-                document.getElementById('wait-overlay').classList.remove('hidden');
-                setTimeout(() => { document.getElementById('wait-overlay').classList.add('hidden'); move(); }, 2500);
+                document.getElementById('incubator-ui').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('incubator-ui').classList.add('hidden');
+                    next();
+                }, 2000);
             } else if (s.special === 'end') {
                 showFinal();
             } else {
-                move();
+                next();
             }
         }
 
-        function move() { currentIdx++; updateUI(); }
+        function next() {
+            currentIdx++;
+            updateLabUI();
+            showQuest(protocol[currentIdx].goal);
+        }
 
-        function updateUI() {
+        function updateLabUI() {
             const s = protocol[currentIdx];
-            document.getElementById('step-badge').textContent = `ШАГ ${currentIdx + 1}/6`;
-            document.getElementById('protocol-title').textContent = s.title;
-            document.getElementById('protocol-desc').textContent = s.desc;
-            document.getElementById('step-goal').textContent = s.goal;
-            document.getElementById('tube-status').textContent = s.status;
-            
-            const fill = document.getElementById('liquid-fill');
-            fill.style.height = s.h;
-            fill.style.backgroundColor = s.c;
-            document.getElementById('tube-body').style.transform = s.special === 'swell' ? 'scale(1.1)' : 'scale(1)';
+            document.getElementById('step-badge').textContent = `STEP ${currentIdx + 1}/6`;
+            document.getElementById('instr-title').textContent = s.title;
+            document.getElementById('instr-desc').textContent = s.desc;
+            document.getElementById('tube-status').textContent = s.goal;
+            const f = document.getElementById('liquid-fill');
+            f.style.height = s.h;
+            f.style.backgroundColor = s.c;
+            document.getElementById('tube-body').style.transform = s.special === 'swell' ? 'scale(1.2)' : 'scale(1)';
         }
 
-        function showError() {
-            document.getElementById('error-box').classList.remove('hidden');
-            document.getElementById('error-txt').textContent = "Нарушен протокол! Сверьтесь с инструкцией.";
-        }
-
-        // --- ЛОГИКА ФИНАЛЬНОГО ЭКРАНА ---
         function showFinal() {
-            document.getElementById('lab-page').classList.add('hidden-page');
-            document.getElementById('results-page').classList.remove('hidden-page');
+            const flash = document.getElementById('flash-overlay');
+            flash.style.opacity = '1';
             
-            const res = results[Math.floor(Math.random() * results.length)];
-            
-            document.getElementById('res-title').textContent = res.title;
-            document.getElementById('res-formula').textContent = res.formula;
-            document.getElementById('res-desc').textContent = res.desc;
-            document.getElementById('final-img').src = res.file;
-            
-            const b = document.getElementById('res-badge');
-            b.textContent = res.isPathology ? 'Патология' : 'Клиническая норма';
-            b.className = `inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-6 ${res.badge}`;
+            setTimeout(() => {
+                document.getElementById('page-lab').classList.add('page-hidden');
+                document.getElementById('page-res').classList.remove('page-hidden');
+                flash.style.opacity = '0';
 
-            const detailsContainer = document.getElementById('pathology-details');
-            detailsContainer.innerHTML = ''; // очистка
-            
-            if (res.isPathology && res.details) {
-                detailsContainer.classList.remove('hidden');
-                res.details.forEach(detail => {
-                    const html = `
-                        <details class="group bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden transition-all duration-300">
-                            <summary class="flex justify-between items-center font-medium cursor-pointer p-5 text-sm text-slate-200 hover:bg-slate-800 transition-colors">
-                                <span class="uppercase text-[11px] tracking-wider font-bold text-blue-400">${detail.title}</span>
-                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-500">▼</span>
-                            </summary>
-                            <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-slate-800/50 mt-2 pt-4">
-                                ${detail.text}
-                            </div>
-                        </details>
-                    `;
-                    detailsContainer.insertAdjacentHTML('beforeend', html);
-                });
-            } else {
-                detailsContainer.classList.add('hidden');
-            }
+                if (shuffled.length === 0) shuffled = [...allResults].sort(() => Math.random() - 0.5);
+                const res = shuffled.pop();
+
+                document.getElementById('res-title').textContent = res.title;
+                document.getElementById('res-formula').textContent = res.formula;
+                document.getElementById('res-desc').textContent = res.desc;
+                document.getElementById('final-img').src = res.file;
+                
+                const b = document.getElementById('res-badge');
+                b.textContent = res.isPathology ? 'Clinical Pathology' : 'Normal Result';
+                b.className = `inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${res.badge} text-white`;
+
+                const acc = document.getElementById('pathology-accordion');
+                acc.innerHTML = '';
+                if (res.isPathology) {
+                    res.details.forEach(d => {
+                        acc.innerHTML += `
+                            <details class="group bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden transition-all">
+                                <summary class="flex justify-between items-center p-5 cursor-pointer hover:bg-slate-800">
+                                    <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">${d.title}</span>
+                                    <span class="text-slate-500 transition-transform">▼</span>
+                                </summary>
+                                <div class="px-5 pb-5 text-sm text-slate-400 font-light leading-relaxed">${d.text}</div>
+                            </details>
+                        `;
+                    });
+                }
+            }, 500);
         }
     </script>
 </body>
