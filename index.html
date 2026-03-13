@@ -3,154 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KaryoLab LIMS v4.2 — Academic System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>KazNMU KaryoLab LIMS v5.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow: hidden; margin: 0; }
         .mono { font-family: 'Roboto Mono', monospace; }
-        
-        .page { position: fixed; inset: 0; width: 100vw; height: 100vh; transition: opacity 0.4s ease; display: flex; flex-direction: column; }
+        .page { position: fixed; inset: 0; width: 100vw; height: 100vh; transition: opacity 0.5s ease; display: flex; flex-direction: column; }
         .page-hidden { opacity: 0; pointer-events: none; }
+        .glass-panel { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .liquid { transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.8s; }
         
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .liquid { transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.8s; }
-
-        /* Уведомление в нижнем правом углу */
+        /* Уведомление в стиле LIMS */
         #academic-notify {
             position: fixed; bottom: 2rem; right: 2rem; z-index: 100;
-            transform: translateX(120%); transition: transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            transform: translateX(120%); transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         #academic-notify.active { transform: translateX(0); }
 
-        @keyframes scanline { 0% { top: 0; } 100% { top: 100%; } }
-        .scan { position: relative; overflow: hidden; }
-        .scan::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.1), transparent); height: 20%; width: 100%; animation: scanline 3s linear infinite; }
+        details summary::-webkit-details-marker { display: none; }
+        details[open] summary svg { transform: rotate(180deg); }
     </style>
 </head>
 <body>
 
-    <div id="academic-notify" class="w-80 glass-panel p-4 border-l-4 border-blue-500 shadow-2xl">
-        <div class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1">System Objective</div>
-        <div id="notify-text" class="text-xs text-slate-200 font-medium"></div>
+    <div id="academic-notify" class="w-80 glass-panel p-5 border-l-4 border-blue-600 shadow-2xl">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest">Protocol Update</span>
+        </div>
+        <div id="notify-text" class="text-[11px] text-slate-200 leading-tight font-medium uppercase"></div>
     </div>
 
     <div id="page-login" class="page items-center justify-center bg-slate-950">
-        <div class="text-center">
-            <h1 class="text-4xl font-black mb-8 tracking-tighter">KARYO<span class="text-blue-600">LAB</span> LIMS</h1>
-            <button onclick="nav('page-login', 'page-phleb')" class="px-8 py-3 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest">
-                Вход в систему
+        <div class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden flex items-center justify-center">
+             <div class="text-[20rem] font-black tracking-tighter select-none">KARYOTYPE</div>
+        </div>
+        <div class="z-10 flex flex-col items-center">
+            <img src="logo.png" alt="KazNMU Logo" class="w-32 mb-6 drop-shadow-2xl">
+            <div class="text-blue-500 font-bold tracking-[0.4em] text-[10px] uppercase mb-2">Kazakh National Medical University</div>
+            <h1 class="text-6xl font-black mb-12 tracking-tighter text-white">KARYO<span class="text-blue-600">LAB</span></h1>
+            <div class="h-[1px] w-24 bg-slate-800 mb-12"></div>
+            <button onclick="nav('page-login', 'page-phleb')" class="px-12 py-5 bg-white text-black hover:bg-blue-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.3em] rounded-sm shadow-xl">
+                Инициализировать систему
             </button>
         </div>
     </div>
 
     <div id="page-phleb" class="page page-hidden bg-white text-slate-900">
-        <header class="h-16 border-b flex items-center px-8 bg-slate-50 justify-between">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Pre-analytical Unit</span>
-            <span class="mono text-[10px]">#PHLEB_DPT</span>
-        </header>
-        <main class="flex-grow flex flex-col items-center justify-center">
-            <div class="relative w-20 h-64 bg-slate-100 rounded-b-full border-2 border-slate-200 flex items-end overflow-hidden mb-10">
-                <div id="blood-fill" class="w-full bg-red-700 h-0 transition-all duration-[2000ms]"></div>
+        <header class="h-20 border-b flex items-center px-10 bg-slate-50 justify-between">
+            <div class="flex items-center gap-4">
+                <img src="logo.png" class="h-8">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Unit 01: Pre-analytics</span>
             </div>
-            <button id="draw-btn" onclick="startDraw()" class="px-8 py-3 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-red-700">Забор биоматериала</button>
-            <button id="next-lab-btn" onclick="nav('page-phleb', 'page-lab')" class="hidden px-8 py-3 bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest">Передача в лабораторию →</button>
+            <span class="mono text-[10px] bg-slate-200 px-3 py-1 rounded">ID: STAT_KAZNMU_2026</span>
+        </header>
+        <main class="flex-grow flex flex-col items-center justify-center p-10">
+            <div class="relative w-24 h-80 bg-slate-100 rounded-b-full border-4 border-slate-200 flex items-end overflow-hidden mb-12 shadow-inner">
+                <div id="blood-fill" class="w-full bg-red-700 h-0 transition-all duration-[2500ms]"></div>
+                <div class="absolute top-0 w-full h-10 bg-green-600/20 border-b-2 border-green-700/30"></div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-xl font-bold mb-2 uppercase tracking-tight">Забор венозной крови</h3>
+                <p class="text-xs text-slate-500 mb-10 max-w-sm mx-auto leading-relaxed">Используется вакуумная система с гепарином лития для предотвращения свертывания и сохранения жизнеспособности лимфоцитов.</p>
+                <button id="draw-btn" onclick="startDraw()" class="px-10 py-4 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg">Пункция вены</button>
+                <button id="next-lab-btn" onclick="nav('page-phleb', 'page-lab')" class="hidden px-10 py-4 bg-slate-950 text-white font-black text-[10px] uppercase tracking-widest animate-bounce">В лабораторию →</button>
+            </div>
         </main>
     </div>
 
     <div id="page-lab" class="page page-hidden bg-slate-900">
         <header class="h-14 border-b border-white/10 flex items-center justify-between px-8 bg-slate-950">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cytogenetic Analysis Protocol</span>
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cytogenetic Workstation</span>
+            </div>
             <span id="step-counter" class="mono text-[10px] text-blue-500">STEP: 01/06</span>
         </header>
 
         <div class="flex flex-grow overflow-hidden">
-            <aside class="w-72 border-r border-white/10 p-6 flex flex-col gap-4 bg-slate-950/30 overflow-y-auto">
-                <h3 class="text-[9px] font-black text-slate-500 uppercase mb-4">Reagents</h3>
+            <aside class="w-80 border-r border-white/10 p-6 flex flex-col gap-4 bg-slate-950/40 overflow-y-auto">
+                <h3 class="text-[9px] font-black text-slate-500 uppercase mb-4 tracking-[0.2em]">Inventory / Reagents</h3>
                 <div id="inventory" class="space-y-3"></div>
             </aside>
 
-            <main class="flex-grow flex items-center justify-center relative bg-[slate-900]">
-                <div id="drop-zone" class="w-80 h-[480px] glass-panel rounded-2xl flex flex-col items-center justify-end pb-12 transition-all border-dashed border-2 border-white/5">
-                    <div id="tube-container" class="relative w-16 h-60 border-2 border-white/20 rounded-b-full overflow-hidden">
+            <main class="flex-grow flex items-center justify-center relative bg-[#0b1222]">
+                <div id="drop-zone" class="w-80 h-[520px] glass-panel rounded-3xl flex flex-col items-center justify-end pb-12 transition-all border-dashed border-2 border-white/5">
+                    <div id="tube-container" class="relative w-16 h-64 border-2 border-white/10 rounded-b-full overflow-hidden shadow-2xl">
                         <div id="liq" class="liquid absolute bottom-0 w-full bg-red-800" style="height: 15%"></div>
                     </div>
-                    <div class="mt-8 text-center px-4">
-                        <div id="status-label" class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Status: Ready</div>
-                        <div id="quest-label" class="text-xs text-slate-500 font-light">Waiting for reagent input...</div>
+                    <div class="mt-10 text-center px-6">
+                        <div id="status-label" class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 animate-pulse">Ready</div>
+                        <div id="quest-label" class="text-[11px] text-slate-400 font-light leading-snug"></div>
                     </div>
                 </div>
 
                 <div id="wait-screen" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center z-50">
-                    <div class="w-64 h-[1px] bg-slate-800 mb-6 relative overflow-hidden">
-                        <div class="absolute inset-y-0 left-0 bg-blue-500 w-1/2 animate-[load_1.5s_infinite]"></div>
+                    <div class="w-64 h-[2px] bg-slate-800 mb-6 relative overflow-hidden">
+                        <div class="absolute inset-y-0 left-0 bg-blue-500 w-1/3 animate-[load_2s_infinite]"></div>
                     </div>
-                    <div class="mono text-[9px] text-blue-400 uppercase tracking-widest">Processing... 37°C stable</div>
+                    <div class="mono text-[10px] text-blue-400 uppercase tracking-widest">Processing Bio-material...</div>
                 </div>
             </main>
 
-            <aside class="w-80 border-l border-white/10 p-8 flex flex-col bg-slate-950/20">
-                <h2 id="step-name" class="text-xl font-bold text-white mb-4 uppercase tracking-tighter"></h2>
-                <p id="step-desc" class="text-xs text-slate-400 leading-relaxed font-light mb-10"></p>
-                <div class="mt-auto border-t border-white/5 pt-6">
-                    <div class="text-[9px] font-black text-slate-500 uppercase mb-2">Protocol Note</div>
-                    <p id="step-goal" class="text-[11px] text-slate-300 italic"></p>
+            <aside class="w-96 border-l border-white/10 p-10 flex flex-col bg-slate-950/30">
+                <div class="mb-10">
+                    <div class="text-[9px] font-bold text-blue-500 uppercase mb-4 tracking-widest">Академический протокол</div>
+                    <h2 id="step-name" class="text-2xl font-black text-white mb-4 uppercase tracking-tighter leading-none"></h2>
+                    <p id="step-desc" class="text-xs text-slate-400 leading-relaxed font-light"></p>
+                </div>
+                <div class="mt-auto bg-slate-900/50 p-6 border border-white/5 rounded-xl">
+                    <div class="text-[9px] font-black text-slate-500 uppercase mb-2">Техническая задача</div>
+                    <p id="step-goal" class="text-[11px] text-blue-100 font-medium"></p>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="page-res" class="page page-hidden bg-slate-950 p-12 overflow-y-auto">
-        <div class="max-w-5xl mx-auto">
-            <div class="border-b border-white/10 pb-6 mb-12 flex justify-between items-end">
-                <div>
-                    <h1 class="text-2xl font-black uppercase text-white">Laboratory Analysis Report</h1>
-                    <p class="text-[9px] text-slate-500 uppercase tracking-[0.3em]">Confidential Medical Data</p>
+    <div id="page-res" class="page page-hidden bg-slate-950 p-10 overflow-y-auto">
+        <div class="max-w-6xl mx-auto">
+            <header class="border-b border-white/10 pb-8 mb-12 flex justify-between items-center">
+                <div class="flex items-center gap-6">
+                    <img src="logo.png" class="h-16">
+                    <div>
+                        <h1 class="text-3xl font-black uppercase text-white tracking-tighter">Medical Genetics Report</h1>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em]">KazNMU Genetic Laboratory System</p>
+                    </div>
                 </div>
-                <div class="mono text-blue-500 text-xs">RESULT_ID: 2026-X</div>
-            </div>
+                <div class="text-right">
+                    <div class="mono text-blue-500 text-xs">REPORT_NO: 2026/CYTO</div>
+                    <div class="text-[9px] text-slate-600 mt-1 uppercase">Date: 13.03.2026</div>
+                </div>
+            </header>
 
-            <div class="grid lg:grid-cols-2 gap-20">
-                <div class="bg-white p-4 rounded-sm scan flex items-center justify-center min-h-[400px]">
-                    <img id="final-img" src="" class="max-h-full object-contain">
+            <div class="grid lg:grid-cols-2 gap-16">
+                <div class="bg-white p-6 rounded-xl flex items-center justify-center relative group">
+                    <img id="final-img" src="" class="max-h-[500px] object-contain">
+                    <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 </div>
                 <div>
-                    <div id="res-badge" class="px-3 py-1 rounded-sm text-[9px] font-black uppercase mb-4 inline-block"></div>
-                    <h2 id="res-title" class="text-4xl font-black mb-2 text-white tracking-tighter"></h2>
-                    <div id="res-formula" class="mono text-blue-400 text-xl mb-8"></div>
-                    <p id="res-desc" class="text-sm text-slate-400 leading-relaxed mb-10 font-light border-l border-slate-700 pl-6"></p>
-                    <div id="pathology-data" class="space-y-6"></div>
-                    <button onclick="location.reload()" class="mt-12 w-full py-4 border border-white/10 text-white text-[9px] font-black uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all">New Session</button>
+                    <div id="res-badge" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-6 inline-block"></div>
+                    <h2 id="res-title" class="text-5xl font-black mb-2 text-white tracking-tighter"></h2>
+                    <div id="res-formula" class="mono text-blue-400 text-2xl mb-8 font-bold"></div>
+                    <p id="res-desc" class="text-sm text-slate-300 leading-relaxed mb-10 font-light border-l-4 border-slate-800 pl-6"></p>
+                    
+                    <div id="pathology-data" class="space-y-4"></div>
+
+                    <button onclick="location.reload()" class="mt-12 w-full py-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.4em] rounded transition-all shadow-2xl">Новое исследование</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ДАННЫЕ С ЛОКАЛЬНЫМИ ФОТО (Убедись, что файлы лежат в той же папке)
+        // ДАННЫЕ С КОРРЕКТНЫМИ ФОРМАТАМИ
         const reagents = [
             { id: 'item-pha', n: 'ФГА', t: 'Phytohaemagglutinin', img: 'pha.png' },
             { id: 'item-inc', n: 'CO2', t: 'Incubator Unit', img: 'incubator.png' },
             { id: 'item-col', n: 'COL', t: 'Colchicine', img: 'colchicine.png' },
-            { id: 'item-kcl', n: 'KCl', t: 'Hypotonic Sol.', img: 'kcl.png' },
-            { id: 'item-fix', n: 'FIX', t: 'Fixative Carnoy', img: 'fixative.png' },
-            { id: 'item-ana', n: 'ANA', t: 'Analysis System', img: 'microscope.png' }
+            { id: 'item-kcl', n: 'KCl', t: 'Hypotonic 0.075M', img: 'kcl.afiv' }, // Твой специфичный формат
+            { id: 'item-fix', n: 'FIX', t: 'Fixative (3:1)', img: 'fixative.png' },
+            { id: 'item-ana', n: 'ANA', t: 'Microscope Analysis', img: 'microscope.png' }
         ];
 
         const protocol = [
-            { req: 'item-pha', n: 'Стимуляция', d: 'Введение ФГА индуцирует переход Т-лимфоцитов из фазы G0 в клеточный цикл.', g: 'Инициация митоза', h: '25%', c: '#991b1b' },
-            { req: 'item-inc', n: 'Инкубация', d: 'Культирование при 37°C в течение 72 часов для достижения максимума делений.', g: 'Накопление клеточной массы', h: '25%', c: '#7f1d1d', special: 'wait' },
-            { req: 'item-col', n: 'Блокада', d: 'Остановка митоза на стадии метафазы путем разрушения нитей веретена деления.', g: 'Стабилизация метафаз', h: '35%', c: '#450a0a' },
-            { req: 'item-kcl', n: 'Гипотония', d: 'Раствор KCl вызывает набухание клеток, что критично для разброса хромосом.', g: 'Осмотический шок', h: '85%', c: '#fca5a5', special: 'swell' },
-            { req: 'item-fix', n: 'Фиксация', d: 'Стабилизация клеточных структур перед нанесением на предметное стекло.', g: 'Фиксация биоматериала', h: '60%', c: '#cbd5e1' },
-            { req: 'item-ana', n: 'Анализ', d: 'Микроскопическое исследование и G-окрашивание метафазных пластинок.', g: 'Визуализация кариотипа', h: '60%', c: '#cbd5e1', special: 'end' }
+            { req: 'item-pha', n: 'Инициация культуры', d: 'Добавление фитогемагглютинина (ФГА) — лектина, выделенного из фасоли. ФГА выступает в роли митогена, вызывая бласттрансформацию Т-лимфоцитов и запуская их деление (митоз).', g: 'Стимулировать Т-лимфоциты', h: '25%', c: '#991b1b' },
+            { req: 'item-inc', n: 'Культивирование', d: 'Инкубация проводится при температуре 37.0°С в атмосфере 5% CO2. Период 72 часа соответствует оптимальному накоплению клеток в стадии деления.', g: 'Выдержка в термостате (72ч)', h: '25%', c: '#7f1d1d', special: 'wait' },
+            { req: 'item-col', n: 'Метафазный стоп', d: 'Введение колхицина ингибирует полимеризацию тубулина, предотвращая образование нитей веретена деления. Клетки замирают на стадии метафазы, когда хромосомы максимально конденсированы.', g: 'Остановить митоз в метафазе', h: '35%', c: '#450a0a' },
+            { req: 'item-kcl', n: 'Гипотонический шок', d: 'Обработка слабым раствором KCl. За счет осмотического градиента вода входит в клетку, увеличивая её объем. Это необходимо для последующего эффективного разброса хромосом на стекле.', g: 'Увеличить объем цитоплазмы', h: '85%', c: '#fca5a5', special: 'swell' },
+            { req: 'item-fix', n: 'Фиксация Карнуа', d: 'Использование охлажденной смеси метанола и ледяной уксусной кислоты (3:1). Фиксатор мгновенно обезвоживает клетку, «замораживая» её структуру и придавая жесткость хромосомам.', g: 'Стабилизировать кариоплазму', h: '60%', c: '#e2e8f0' },
+            { req: 'item-ana', n: 'Диагностика', d: 'Раскапывание суспензии на холодные стекла. После высыхания проводится G-окрашивание (по Гимзе) для визуализации характерной исчерченности каждой хромосомы.', g: 'Провести визуальный анализ', h: '60%', c: '#e2e8f0', special: 'end' }
         ];
 
         const resPool = [
-            { f: 'norm_m.jpg', t: 'Normal (Male)', c: '46, XY', d: 'Клиническая норма. Численных и структурных аномалий не обнаружено.', b: 'bg-emerald-600', isP: false },
-            { f: 'down.jpg', t: 'Trisomy 21', c: '47, XY, +21', d: 'Синдром Дауна. Обнаружена дополнительная 21-я хромосома.', b: 'bg-red-600', isP: true, det: [{h:'Мутация', t:'Трисомия 21'}, {h:'Патогенез', t:'Нарушение расхождения хромосом в мейозе'}] },
-            { f: 'edwards.jpg', t: 'Trisomy 18', c: '47, XX, +18', d: 'Синдром Эдвардса. Выраженные морфологические отклонения.', b: 'bg-red-600', isP: true, det: [{h:'Мутация', t:'Трисомия 18'}, {h:'Патогенез', t:'Генетический дисбаланс'}] },
-            { f: 'patau.jpg', t: 'Trisomy 13', c: '47, XY, +13', d: 'Синдром Патау. Тяжелые пороки развития.', b: 'bg-red-600', isP: true, det: [{h:'Мутация', t:'Трисомия 13'}, {h:'Патогенез', t:'Нарушение эмбриогенеза'}] }
+            { f: 'norm_m.jpg', t: 'Нормальный мужской кариотип', c: '46, XY', d: 'Численных и структурных аномалий не выявлено. Набор хромосом соответствует биологической норме.', b: 'bg-emerald-600', isP: false },
+            { 
+                f: 'down.jpg', t: 'Синдром Дауна', c: '47, XY, +21', d: 'Наиболее частая хромосомная патология, характеризующаяся наличием дополнительной 21-й хромосомы.', b: 'bg-red-600', isP: true, 
+                det: [
+                    {h:'Цитогенетика', t:'В 95% случаев — полная трисомия (результат нерасхождения в мейозе). Также возможна транслокационная форма (чаще t(14;21)) и мозаицизм.'},
+                    {h:'Патогенез', t:'Генный дисбаланс критического региона 21-й хромосомы (DSCR) приводит к нарушению нейрогенеза и морфогенеза сердца.'},
+                    {h:'Фенотип', t:'Монголоидный разрез глаз, эпикант, плоское лицо, макроглоссия, сандалевидная щель на стопе, пороки сердца (ДМЖП).'}
+                ] 
+            },
+            { 
+                f: 'edwards.jpg', t: 'Синдром Эдвардса', c: '47, XX, +18', d: 'Тяжелое хромосомное нарушение с крайне низкой выживаемостью.', b: 'bg-red-600', isP: true, 
+                det: [
+                    {h:'Цитогенетика', t:'Трисомия 18. Риск резко возрастает с возрастом матери.'},
+                    {h:'Патогенез', t:'Множественные пороки внутренних органов вследствие нарушения эмбрионального деления клеток.'},
+                    {h:'Клиническая картина', t:'Специфическая флексорная установка пальцев кисти (указательный накрывает средний), стопа-качалка, долихоцефалия, низко расположенные ушные раковины.'}
+                ] 
+            },
+            { 
+                f: 'patau.jpg', t: 'Синдром Патау', c: '47, XY, +13', d: 'Критическое нарушение развития, характеризующееся грубыми пороками ЦНС и лица.', b: 'bg-red-600', isP: true, 
+                det: [
+                    {h:'Цитогенетика', t:'Трисомия 13. Часто ассоциирована с робертсоновскими транслокациями.'},
+                    {h:'Патогенез', t:'Глубокие нарушения формирования структур переднего мозга и среднего отдела лица.'},
+                    {h:'Клиническая картина', t:'Расщелины губы и неба (хейло- и палатошизис), полидактилия, микрофтальмия, голопрозэнцефалия.'}
+                ] 
+            }
         ];
 
         let currentIdx = 0;
@@ -158,34 +208,32 @@
         function nav(from, to) {
             document.getElementById(from).classList.add('page-hidden');
             document.getElementById(to).classList.remove('page-hidden');
-            if(to === 'page-lab') { 
-                renderInv(); 
-                updateLab(); 
-                showNotify(protocol[0].g); 
-            }
-            if(to === 'page-phleb') showNotify('Забор биоматериала');
+            if(to === 'page-lab') { renderInv(); updateLab(); }
+            if(to === 'page-phleb') showNotify('Протокол забора крови запущен');
         }
 
         function showNotify(text) {
             const n = document.getElementById('academic-notify');
             document.getElementById('notify-text').textContent = text;
             n.classList.add('active');
-            setTimeout(() => n.classList.remove('active'), 3000);
+            setTimeout(() => n.classList.remove('active'), 3500);
         }
 
         function startDraw() {
             document.getElementById('draw-btn').style.display = 'none';
             document.getElementById('blood-fill').style.height = '85%';
-            setTimeout(() => document.getElementById('next-lab-btn').classList.remove('hidden'), 2000);
+            setTimeout(() => document.getElementById('next-lab-btn').classList.remove('hidden'), 2500);
         }
 
         function renderInv() {
             const inv = document.getElementById('inventory');
             inv.innerHTML = reagents.map(r => `
-                <div id="${r.id}" draggable="true" class="bg-slate-900 border border-white/5 p-3 rounded flex items-center gap-4 cursor-grab hover:border-blue-500/30 transition-all">
-                    <img src="${r.img}" class="w-10 h-10 object-contain">
+                <div id="${r.id}" draggable="true" class="bg-slate-900/50 border border-white/5 p-4 rounded-xl flex items-center gap-4 cursor-grab active:cursor-grabbing hover:border-blue-500/40 transition-all group">
+                    <div class="w-12 h-12 bg-white/5 rounded-lg p-2 flex items-center justify-center">
+                        <img src="${r.img}" class="max-w-full max-h-full object-contain filter brightness-125">
+                    </div>
                     <div>
-                        <div class="text-[9px] font-black text-white uppercase">${r.n}</div>
+                        <div class="text-[10px] font-black text-white uppercase tracking-tighter">${r.n}</div>
                         <div class="text-[8px] text-slate-500 uppercase">${r.t}</div>
                     </div>
                 </div>
@@ -194,16 +242,17 @@
         }
 
         const dz = document.getElementById('drop-zone');
-        dz.ondragover = e => { e.preventDefault(); dz.style.backgroundColor = 'rgba(59, 130, 246, 0.05)'; };
-        dz.ondragleave = () => dz.style.backgroundColor = 'transparent';
+        dz.ondragover = e => { e.preventDefault(); dz.style.borderColor = 'rgba(59, 130, 246, 0.4)'; dz.style.backgroundColor = 'rgba(59, 130, 246, 0.05)'; };
+        dz.ondragleave = () => { dz.style.borderColor = 'rgba(255,255,255,0.05)'; dz.style.backgroundColor = 'transparent'; };
         dz.ondrop = e => {
             e.preventDefault();
+            dz.style.borderColor = 'rgba(255,255,255,0.05)';
             dz.style.backgroundColor = 'transparent';
             const id = e.dataTransfer.getData('id');
             if(id === protocol[currentIdx].req) {
                 if(protocol[currentIdx].special === 'wait') {
                     document.getElementById('wait-screen').classList.remove('hidden');
-                    setTimeout(() => { document.getElementById('wait-screen').classList.add('hidden'); advance(); }, 2000);
+                    setTimeout(() => { document.getElementById('wait-screen').classList.add('hidden'); advance(); }, 2500);
                 } else if(protocol[currentIdx].special === 'end') {
                     finish();
                 } else {
@@ -215,7 +264,7 @@
         function advance() { 
             currentIdx++; 
             updateLab(); 
-            showNotify(protocol[currentIdx].g);
+            showNotify(`Этап выполнен: ${protocol[currentIdx-1].n}`);
         }
 
         function updateLab() {
@@ -229,7 +278,7 @@
             const liq = document.getElementById('liq');
             liq.style.height = s.h;
             liq.style.backgroundColor = s.c;
-            document.getElementById('tube-container').style.transform = s.special === 'swell' ? 'scale(1.2)' : 'scale(1)';
+            document.getElementById('tube-container').style.transform = s.special === 'swell' ? 'scale(1.15)' : 'scale(1)';
         }
 
         function finish() {
@@ -237,24 +286,33 @@
             // Шанс патологии 80%
             let res;
             if(Math.random() < 0.8) {
-                const p = resPool.filter(x => x.isP);
-                res = p[Math.floor(Math.random() * p.length)];
+                const paths = resPool.filter(r => r.isP);
+                res = paths[Math.floor(Math.random() * paths.length)];
             } else {
-                res = resPool.find(x => !x.isP);
+                res = resPool.find(r => !r.isP);
             }
+
             document.getElementById('res-title').textContent = res.t;
             document.getElementById('res-formula').textContent = res.c;
             document.getElementById('res-desc').textContent = res.d;
             document.getElementById('final-img').src = res.f;
             const b = document.getElementById('res-badge');
-            b.textContent = res.isP ? 'Pathology Detected' : 'No Anomalies';
-            b.className = `px-3 py-1 rounded-sm text-[9px] font-black uppercase mb-4 inline-block ${res.b} text-white`;
-            
+            b.textContent = res.isP ? 'Pathological Findings' : 'Normal Karyotype';
+            b.className = `px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-6 inline-block ${res.b} text-white shadow-lg`;
+
             const data = document.getElementById('pathology-data');
             data.innerHTML = '';
             if(res.isP) {
                 res.det.forEach(d => {
-                    data.innerHTML += `<div><div class="text-[9px] font-black text-blue-500 uppercase mb-1">${d.h}</div><div class="text-xs text-slate-300">${d.t}</div></div>`;
+                    data.innerHTML += `
+                        <details class="group bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden transition-all">
+                            <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-900 transition-colors">
+                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">${d.h}</span>
+                                <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </summary>
+                            <div class="px-4 pb-4 text-[12px] text-slate-400 font-light leading-relaxed">${d.t}</div>
+                        </details>
+                    `;
                 });
             }
         }
