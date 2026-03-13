@@ -39,10 +39,6 @@
 </head>
 <body class="antialiased selection:bg-blue-500 selection:text-white">
 
-    <div id="error-toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-red-600/90 text-white px-8 py-4 rounded-full font-bold opacity-0 transition-opacity duration-300 z-[100] pointer-events-none shadow-[0_0_30px_rgba(220,38,38,0.6)] tracking-wide">
-        Нарушение протокола!
-    </div>
-
     <div id="landing-page" class="min-h-screen relative">
         <nav class="fixed w-full glass-panel z-40 bg-slate-900/80 backdrop-blur-md border-b border-white/10 px-8 py-4 flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -73,7 +69,9 @@
             <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
                 <div>
                     <h2 class="text-4xl font-black mb-6 text-blue-500">Проблема: Цена Ошибки</h2>
-                    <p class="text-slate-300 text-lg leading-relaxed mb-6">Подготовка квалифицированного врача-генетика требует сотен часов лабораторной практики. Однако реагенты (Колхицин, ФГА) токсичны и дороги, а биоматериал ограничен.</p>
+                    <p class="text-slate-300 text-lg leading-relaxed mb-6">
+                        Подготовка квалифицированного врача-генетика требует сотен часов лабораторной практики. Однако реагенты (Колхицин, ФГА) токсичны и дороги, а биоматериал ограничен.
+                    </p>
                     <ul class="space-y-4 text-slate-400">
                         <li class="flex items-center gap-3"><span class="text-red-500 font-bold">✕</span> Высокая стоимость обучения одного специалиста.</li>
                         <li class="flex items-center gap-3"><span class="text-red-500 font-bold">✕</span> Отсутствие права на ошибку у студентов.</li>
@@ -83,11 +81,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-900 p-8 rounded-2xl border border-white/5 text-center">
                         <div class="text-5xl font-black text-white mb-2">~15к ₸</div>
-                        <div class="text-sm text-slate-500 uppercase">Один реальный тест</div>
+                        <div class="text-sm text-slate-500 uppercase">Стоимость одного реального теста</div>
                     </div>
                     <div class="bg-slate-900 p-8 rounded-2xl border border-white/5 text-center">
                         <div class="text-5xl font-black text-white mb-2">0 ₸</div>
-                        <div class="text-sm text-blue-500 font-bold uppercase">В KaryoLab</div>
+                        <div class="text-sm text-blue-500 font-bold uppercase">Стоимость в KaryoLab</div>
                     </div>
                 </div>
             </div>
@@ -105,7 +103,7 @@
                 </div>
                 <div class="bg-slate-800/50 p-8 rounded-2xl border border-blue-500/20">
                     <h3 class="text-xl font-bold mb-3 text-white">Генерация Патологий</h3>
-                    <p class="text-slate-400 text-sm">Алгоритм случайным образом генерирует микроскопическую картину, заставляя студента самостоятельно ставить диагноз.</p>
+                    <p class="text-slate-400 text-sm">Алгоритм случайным образом генерирует микроскопическую картину, заставляя студента самостоятельно ставить диагноз (Даун, Патау, Эдвардс).</p>
                 </div>
                 <div class="bg-slate-800/50 p-8 rounded-2xl border border-blue-500/20">
                     <h3 class="text-xl font-bold mb-3 text-white">Доступность</h3>
@@ -130,21 +128,22 @@
         </section>
     </div>
 
-    <div id="app-phleb" class="app-screen bg-slate-900 relative">
-        <header class="h-16 border-b border-white/10 flex items-center px-8 bg-slate-950 justify-between z-10 shadow-sm">
-            <span class="font-bold text-white">Этап 1: Преаналитика</span>
-            <span id="phleb-hint" class="text-blue-500 font-bold animate-pulse">Выберите правильный инструмент</span>
+    <div id="app-phleb" class="app-screen bg-slate-100 text-slate-900 relative">
+        <header class="h-16 border-b flex items-center px-8 bg-white justify-between z-10 shadow-sm">
+            <span class="font-bold text-slate-800">Этап 1: Преаналитика</span>
+            <span id="phleb-hint" class="text-blue-600 font-bold animate-pulse">Наложите жгут</span>
         </header>
         
-        <div class="flex-grow relative flex items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black">
-            <img id="main-arm" src="arm.png" class="absolute w-[600px] h-[200px] object-contain z-10 placeholder" alt="Рука">
+        <div class="flex-grow relative flex items-center justify-center overflow-hidden">
+            <img src="arm.png" class="absolute w-[600px] h-[200px] object-contain z-10 placeholder" alt="Рука">
             
-            <div class="absolute bottom-10 flex gap-8 z-20 bg-slate-950/80 px-8 py-4 rounded-3xl border border-white/10 backdrop-blur-md">
+            <div class="absolute bottom-10 left-10 flex gap-6 z-20">
                 <img id="tool-tourn" src="tourniquet.png" onclick="phlebAction('tourn')" class="game-item w-24 h-24 object-contain placeholder" alt="Жгут">
-                <img id="tool-swab" src="swab.png" onclick="phlebAction('swab')" class="game-item w-20 h-20 object-contain placeholder" alt="Салфетка">
-                <img id="tool-syr" src="syringe.png" onclick="phlebAction('syr')" class="game-item w-32 h-10 object-contain placeholder" alt="Шприц">
+                <img id="tool-swab" src="swab.png" onclick="phlebAction('swab')" class="game-item w-20 h-20 object-contain hidden-item placeholder" alt="Салфетка">
+                <img id="tool-syr" src="syringe.png" onclick="phlebAction('syr')" class="game-item w-32 h-10 object-contain hidden-item placeholder" alt="Шприц">
             </div>
 
+            <div id="anim-tourn" class="absolute w-16 h-40 bg-blue-500/50 rounded z-20 hidden-item" style="top: 30%; left: 40%;">ЖГУТ</div>
             <div id="anim-blood" class="absolute w-4 h-4 bg-red-600 rounded-full z-20 hidden-item" style="top: 50%; left: 55%;"></div>
         </div>
     </div>
@@ -152,28 +151,30 @@
     <div id="app-lab" class="app-screen bg-[#1e293b] relative">
         <header class="h-14 border-b border-white/10 flex items-center justify-between px-8 bg-slate-950 z-20">
             <span class="font-bold text-white">Лаборатория Цитогенетики</span>
-            <span id="lab-hint" class="text-blue-400 font-bold uppercase tracking-widest text-xs">Добавьте стимулятор (ФГА)</span>
+            <span id="lab-hint" class="text-blue-400 font-bold uppercase tracking-widest text-xs">Добавьте ФГА</span>
         </header>
 
         <div class="flex-grow relative bg-[url('desk_bg.png')] bg-cover bg-center overflow-hidden flex items-center justify-center">
             <div class="absolute inset-0 bg-slate-900/50"></div> 
 
             <img id="main-tube" src="blood.png" class="absolute z-20 w-16 h-64 object-contain placeholder transition-all duration-500" alt="Пробирка">
+            
             <img id="main-slide" src="slide.png" class="absolute z-10 w-48 h-16 object-contain hidden-item placeholder transition-all duration-500" alt="Стекло">
+
             <div id="drop-anim" class="absolute w-4 h-4 bg-white rounded-full z-30 hidden-item" style="top: 20%;"></div>
 
-            <div class="absolute bottom-8 flex gap-6 z-30 bg-slate-950/80 px-8 py-4 rounded-3xl border border-white/10 backdrop-blur-md">
-                <img src="pha.png" onclick="labAction('pha')" class="game-item w-16 h-20 object-contain placeholder" alt="ФГА">
-                <img src="colchicine.png" onclick="labAction('col')" class="game-item w-16 h-20 object-contain placeholder" alt="Колхицин">
-                <img src="kcl.avif" onclick="labAction('kcl')" class="game-item w-16 h-20 object-contain placeholder" alt="KCl">
-                <img src="fixative.png" onclick="labAction('fix')" class="game-item w-16 h-20 object-contain placeholder" alt="Фиксатор">
-                <img src="pipette.png" onclick="labAction('drop')" class="game-item w-10 h-24 object-contain placeholder" alt="Пипетка">
+            <div class="absolute bottom-8 flex gap-4 z-30 bg-slate-950/80 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                <img src="pha.png" onclick="labAction('pha', this)" class="game-item w-16 h-20 object-contain placeholder" alt="ФГА">
+                <img src="colchicine.png" onclick="labAction('col', this)" class="game-item w-16 h-20 object-contain hidden-item placeholder" id="item-col" alt="Колхицин">
+                <img src="kcl.avif" onclick="labAction('kcl', this)" class="game-item w-16 h-20 object-contain hidden-item placeholder" id="item-kcl" alt="KCl">
+                <img src="fixative.png" onclick="labAction('fix', this)" class="game-item w-16 h-20 object-contain hidden-item placeholder" id="item-fix" alt="Фиксатор">
+                <img src="pipette.png" onclick="labAction('drop', this)" class="game-item w-10 h-24 object-contain hidden-item placeholder" id="item-pipette" alt="Пипетка">
             </div>
 
-            <div class="absolute top-10 right-10 flex flex-col gap-6 z-30 bg-slate-950/80 p-4 rounded-3xl border border-white/10 backdrop-blur-md">
-                <img src="incubator.png" onclick="labAction('inc')" class="game-item w-32 h-32 object-contain placeholder" alt="Термостат">
-                <img src="centrifuge.png" onclick="labAction('spin')" class="game-item w-32 h-24 object-contain placeholder" alt="Центрифуга">
-                <img src="microscope.png" onclick="labAction('micro')" class="game-item w-32 h-40 object-contain placeholder" alt="Микроскоп">
+            <div class="absolute top-10 right-10 flex flex-col gap-6 z-30">
+                <img src="incubator.png" onclick="labAction('inc', this)" class="game-item w-32 h-32 object-contain hidden-item placeholder" id="item-inc" alt="Термостат">
+                <img src="centrifuge.png" onclick="labAction('spin', this)" class="game-item w-32 h-24 object-contain hidden-item placeholder" id="item-spin" alt="Центрифуга">
+                <img src="microscope.png" onclick="labAction('micro', this)" class="game-item w-32 h-40 object-contain hidden-item placeholder" id="item-micro" alt="Микроскоп">
             </div>
         </div>
     </div>
@@ -193,38 +194,30 @@
     </div>
 
     <script>
-        // Функция для вызова красной ошибки
-        function showError(msg) {
-            const toast = document.getElementById('error-toast');
-            toast.textContent = msg;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-            }, 2500);
-        }
-
         function startApp() {
             document.getElementById('landing-page').style.display = 'none';
             document.getElementById('app-phleb').classList.add('active');
         }
 
-        // --- ЛОГИКА ПРОЦЕДУРНОГО КАБИНЕТА ---
         let phlebStep = 0;
-        const armImg = document.getElementById('main-arm');
-
         function phlebAction(action) {
             const hint = document.getElementById('phleb-hint');
             
             if(action === 'tourn' && phlebStep === 0) {
-                armImg.src = 'arm_tourniquet.png'; // Появляется рука со жгутом
+                document.getElementById('tool-tourn').classList.add('hidden-item');
+                document.getElementById('anim-tourn').classList.remove('hidden-item');
+                document.getElementById('tool-swab').classList.remove('hidden-item');
                 hint.textContent = 'Обработайте место пункции';
                 phlebStep = 1;
             }
             else if(action === 'swab' && phlebStep === 1) {
+                document.getElementById('tool-swab').classList.add('hidden-item');
+                document.getElementById('tool-syr').classList.remove('hidden-item');
                 hint.textContent = 'Введите иглу и наберите кровь';
                 phlebStep = 2;
             }
             else if(action === 'syr' && phlebStep === 2) {
+                document.getElementById('tool-syr').classList.add('hidden-item');
                 document.getElementById('anim-blood').classList.remove('hidden-item');
                 hint.textContent = 'Кровь набрана. Переход в лабораторию...';
                 
@@ -233,67 +226,79 @@
                     document.getElementById('app-lab').classList.add('active');
                 }, 2000);
             }
-            else {
-                showError('Неверное действие! Подумайте над последовательностью.');
-            }
         }
 
-        // --- ЛОГИКА ЛАБОРАТОРИИ ---
         let labStep = 0;
         const tube = document.getElementById('main-tube');
         const hintLab = document.getElementById('lab-hint');
 
-        // Обрати внимание, баночки больше не скрываются, передается только action
-        function labAction(action) {
+        function labAction(action, element) {
             if(action === 'pha' && labStep === 0) {
-                tube.src = 'blood.png'; // Можно поменять на пробирку с ФГА потом
+                element.classList.add('hidden-item'); 
+                // Пока оставляю blood.png, позже добавишь tube_pha.png
+                tube.src = 'blood.png'; 
+                document.getElementById('item-inc').classList.remove('hidden-item');
                 hintLab.textContent = 'Поместите в термостат (72 часа, 37°C)';
                 labStep = 1;
             }
             else if(action === 'inc' && labStep === 1) {
+                document.getElementById('item-inc').classList.add('hidden-item');
                 tube.classList.add('opacity-0'); 
                 hintLab.textContent = 'Инкубация...';
                 
                 setTimeout(() => {
                     tube.classList.remove('opacity-0');
+                    document.getElementById('item-col').classList.remove('hidden-item');
                     hintLab.textContent = 'Остановите митоз (Добавьте Колхицин)';
                     labStep = 2;
                 }, 2000);
             }
             else if(action === 'col' && labStep === 2) {
+                element.classList.add('hidden-item');
+                document.getElementById('item-spin').classList.remove('hidden-item');
                 hintLab.textContent = 'Отцентрифугируйте суспензию';
                 labStep = 3;
             }
             else if(action === 'spin' && labStep === 3) {
-                const spinner = document.querySelector('img[alt="Центрифуга"]');
-                spinner.classList.add('spinning');
+                document.getElementById('item-spin').classList.add('spinning');
                 tube.classList.add('opacity-0');
                 hintLab.textContent = 'Центрифугирование (1000 об/мин)...';
 
                 setTimeout(() => {
-                    spinner.classList.remove('spinning');
-                    tube.src = 'blood.png'; // Можно поменять на пробирку с осадком
+                    document.getElementById('item-spin').classList.remove('spinning');
+                    document.getElementById('item-spin').classList.add('hidden-item');
+                    // Пока оставляю blood.png
+                    tube.src = 'blood.png'; 
                     tube.classList.remove('opacity-0');
+                    document.getElementById('item-kcl').classList.remove('hidden-item');
                     hintLab.textContent = 'Проведите гипотонический шок (добавьте KCl)';
                     labStep = 4;
                 }, 3000);
             }
             else if(action === 'kcl' && labStep === 4) {
+                element.classList.add('hidden-item');
+                // Пока оставляю blood.png
                 tube.src = 'blood.png'; 
                 tube.style.transform = 'scale(1.2)'; 
+                document.getElementById('item-fix').classList.remove('hidden-item');
                 hintLab.textContent = 'Зафиксируйте материал (Фиксатор Карнуа)';
                 labStep = 5;
             }
             else if(action === 'fix' && labStep === 5) {
+                element.classList.add('hidden-item');
+                // Пока оставляю blood.png
                 tube.src = 'blood.png';
                 tube.style.transform = 'scale(1)';
                 
                 tube.classList.add('hidden-item'); 
                 document.getElementById('main-slide').classList.remove('hidden-item'); 
+                document.getElementById('item-pipette').classList.remove('hidden-item');
                 hintLab.textContent = 'Раскапайте суспензию на стекло с высоты 50 см';
                 labStep = 6;
             }
             else if(action === 'drop' && labStep === 6) {
+                element.classList.add('hidden-item');
+                
                 const drop = document.getElementById('drop-anim');
                 drop.classList.remove('hidden-item');
                 drop.classList.add('dropping');
@@ -301,16 +306,13 @@
 
                 setTimeout(() => {
                     drop.classList.add('hidden-item');
+                    document.getElementById('item-micro').classList.remove('hidden-item');
                     hintLab.textContent = 'Проведите микроскопический анализ';
                     labStep = 7;
                 }, 1000);
             }
             else if(action === 'micro' && labStep === 7) {
                 finishGame();
-            }
-            else {
-                // Если кликнули не туда или не в то время
-                showError('Нарушение протокола! Вспомните теорию.');
             }
         }
 
@@ -338,3 +340,6 @@
             document.getElementById('res-desc').textContent = res.desc;
             document.getElementById('final-img').src = res.img;
         }
+    </script>
+</body>
+</html>
